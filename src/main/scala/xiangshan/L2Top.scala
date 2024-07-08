@@ -31,6 +31,7 @@ import huancun.BankBitsKey
 import system.HasSoCParameter
 import top.BusPerfMonitor
 import utility._
+import utility.sram.SramBroadcastBundle
 import xiangshan.cache.mmu.TlbRequestIO
 import xiangshan.backend.fu.PMPRespBundle
 
@@ -103,7 +104,8 @@ class L2TopInlined()(implicit p: Parameters) extends LazyModule
     val config = new Config((_, _, _) => {
       case L2ParamKey => coreParams.L2CacheParamsOpt.get.copy(
         hartId = p(XSCoreParamsKey).HartId,
-        FPGAPlatform = debugOpts.FPGAPlatform
+        FPGAPlatform = debugOpts.FPGAPlatform//,
+        //hasMbist = hasMbist
       )
       case EnableCHI => p(EnableCHI)
       case CHIIssue => p(CHIIssue)
@@ -171,6 +173,14 @@ class L2TopInlined()(implicit p: Parameters) extends LazyModule
       // val reset_core = IO(Output(Reset()))
     })
 
+    // val dft_reset = IO(Input(new DFTResetSignals()))
+    // val dft_reset_out = IO(Output(new DFTResetSignals()))
+    // val dft = if(hasMbist) Some(IO(Input(new SramBroadcastBundle))) else None
+    // val dft_out = if(hasMbist) Some(IO(Output(new SramBroadcastBundle))) else None
+    // if(hasMbist){
+    //   dft_out.get := dft.get
+    // }
+
     val resetDelayN = Module(new DelayN(UInt(PAddrBits.W), 5))
 
     beu.module.io.errors <> io.beu_errors
@@ -178,6 +188,7 @@ class L2TopInlined()(implicit p: Parameters) extends LazyModule
     io.reset_vector.toCore := resetDelayN.io.out
     io.hartId.toCore := io.hartId.fromTile
     io.cpu_halt.toTile := io.cpu_halt.fromCore
+    // dft_reset_out := dft_reset
     dontTouch(io.hartId)
     dontTouch(io.cpu_halt)
     if (!io.chi.isEmpty) { dontTouch(io.chi.get) }
@@ -194,6 +205,14 @@ class L2TopInlined()(implicit p: Parameters) extends LazyModule
       l2.io.debugTopDown.robHeadPaddr := io.debugTopDown.robHeadPaddr
       l2.io.debugTopDown.robTrueCommit := io.debugTopDown.robTrueCommit
       io.debugTopDown.l2MissMatch := l2.io.debugTopDown.l2MissMatch
+
+      // l2.dft_reset := dft_reset
+      // dft_reset_out := l2.dft_reset_out
+
+      // if(hasMbist) {
+      //   l2.dft.get := dft.get
+      //   dft_out.get := l2.dft_out.get
+      // }
 
       /* l2 tlb */
       io.l2_tlb_req.req.bits := DontCare
@@ -262,11 +281,23 @@ class L2Top()(implicit p: Parameters) extends LazyModule
     val reset_core = IO(Output(Reset()))
     io <> inner.module.io
 
+    // val dft_reset = IO(Input(new DFTResetSignals()))
+    // val dft_reset_out = IO(Output(new DFTResetSignals()))
+    // inner.module.dft_reset := dft_reset
+    // dft_reset_out := inner.module.dft_reset_out
+
+    // val dft = if(hasMbist) Some(IO(Input(new SramBroadcastBundle))) else None
+    // val dft_out = if(hasMbist) Some(IO(Output(new SramBroadcastBundle))) else None
+    // if(hasMbist) {
+    //   inner.module.dft.get := dft.get
+    //   dft_out.get := inner.module.dft_out.get
+    // }
+
     if (debugOpts.ResetGen) {
       ResetGen(ResetGenNode(Seq(
         CellNode(reset_core),
         ModuleNode(inner.module)
-      )), reset, sim = false)
+      )), reset, None, !p(DebugOptionsKey).ResetGen)
     } else {
       reset_core := DontCare
     }

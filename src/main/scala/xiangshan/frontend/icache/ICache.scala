@@ -25,6 +25,7 @@ import freechips.rocketchip.util.BundleFieldBase
 import huancun.{AliasField, PrefetchField}
 import org.chipsalliance.cde.config.Parameters
 import utility._
+import utility.mbist.MbistPipeline
 import utils._
 import xiangshan._
 import xiangshan.cache._
@@ -242,7 +243,8 @@ class ICacheMetaArray()(implicit p: Parameters) extends ICacheArray
       way=nWays,
       shouldReset = true,
       holdRead = true,
-      singlePort = true
+      singlePort = true,
+      hasMbist = hasMbist
     ))
 
     //meta connection
@@ -261,6 +263,7 @@ class ICacheMetaArray()(implicit p: Parameters) extends ICacheArray
 
     tagArray
   }
+  private val mbistPl = MbistPipeline.PlaceMbistPipeline(1, "MbistPipeIcacheTag", hasMbist)
 
   val read_set_idx_next = RegEnable(io.read.bits.vSetIdx, 0.U.asTypeOf(io.read.bits.vSetIdx), io.read.fire)
   val valid_array = RegInit(VecInit(Seq.fill(nWays)(0.U(nSets.W))))
@@ -363,17 +366,17 @@ class ICacheDataArray(implicit p: Parameters) extends ICacheArray
     }
   }
 
-  val dataArrays = (0 until nWays).map{ way =>
-    (0 until ICacheDataBanks).map { bank =>
+  val dataArrays = Seq.tabulate(nWays) { way =>
+    val banks = Seq.tabulate(ICacheDataBanks) { bank =>
       val sramBank = Module(new SRAMTemplateWithFixedWidth(
         UInt(ICacheDataEntryBits.W),
         set=nSets,
         width=ICacheDataSRAMWidth,
         shouldReset = true,
         holdRead = true,
-        singlePort = true
+        singlePort = true,
+        hasMbist = hasMbist
       ))
-
       // read
       sramBank.io.r.req.valid := io.read(bank % 4).valid && masks(way)(bank)
       sramBank.io.r.req.bits.apply(setIdx=Mux(lineSel(bank),
@@ -389,6 +392,8 @@ class ICacheDataArray(implicit p: Parameters) extends ICacheArray
       )
       sramBank
     }
+    MbistPipeline.PlaceMbistPipeline(1, s"MbistPipeIcacheDataWay${way}", hasMbist)
+    banks
   }
 
   /**
@@ -686,7 +691,8 @@ class SRAMTemplateWithFixedWidth[T <: Data]
 (
   gen: T, set: Int, width: Int, way: Int = 1,
   shouldReset: Boolean = false, holdRead: Boolean = false,
-  singlePort: Boolean = false, bypassWrite: Boolean = false
+  singlePort: Boolean = false, bypassWrite: Boolean = false,
+  hasMbist:Boolean = false
 ) extends Module {
 
   val dataBits  = gen.getWidth
@@ -714,6 +720,7 @@ class SRAMTemplateWithFixedWidth[T <: Data]
       holdRead = holdRead,
       singlePort = singlePort,
       bypassWrite = bypassWrite,
+      hasMbist = hasMbist
     ))
     // read req
     sramBank.io.r.req.valid       := io.r.req.valid

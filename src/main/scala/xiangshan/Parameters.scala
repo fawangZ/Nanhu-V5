@@ -353,7 +353,8 @@ case class XSCoreParameters
   usePTWRepeater: Boolean = false,
   softTLB: Boolean = false, // dpi-c l1tlb debug only
   softPTW: Boolean = false, // dpi-c l2tlb debug only
-  softPTWDelay: Int = 1
+  softPTWDelay: Int = 1,
+  hasMbist:Boolean = false
 ){
   def vlWidth = log2Up(VLEN) + 1
 
@@ -549,13 +550,13 @@ case class DebugOptions
   FPGAPlatform: Boolean = false,
   ResetGen: Boolean = false,
   EnableDifftest: Boolean = false,
-  AlwaysBasicDiff: Boolean = true,
+  AlwaysBasicDiff: Boolean = false,
   EnableDebug: Boolean = false,
-  EnablePerfDebug: Boolean = true,
+  EnablePerfDebug: Boolean = false,
   UseDRAMSim: Boolean = false,
   EnableConstantin: Boolean = false,
   EnableChiselDB: Boolean = false,
-  AlwaysBasicDB: Boolean = true,
+  AlwaysBasicDB: Boolean = false,
   EnableRollingDB: Boolean = false
 )
 
@@ -868,6 +869,7 @@ trait HasXSParameter {
   def numCSRPCntLsu      = 8
   def numCSRPCntHc       = 5
   def printEventCoding   = true
+  def hasMbist = coreParams.hasMbist
 
   // Vector load exception
   def maxMergeNumPerCycle = 4

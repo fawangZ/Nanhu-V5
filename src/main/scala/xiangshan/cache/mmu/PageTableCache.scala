@@ -24,9 +24,9 @@ import xiangshan._
 import xiangshan.cache.{HasDCacheParameters, MemoryOpConstants}
 import utils._
 import utility._
-import coupledL2.utils.SplittedSRAM
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp}
 import freechips.rocketchip.tilelink._
+import utility.mbist.MbistPipeline
 
 /* ptw cache caches the page table of all the three layers
  * ptw cache resp at next cycle
@@ -214,8 +214,9 @@ class PtwCache()(implicit p: Parameters) extends XSModule with HasPtwConst with 
     waySplit = 2,
     dataSplit = 4,
     singlePort = sramSinglePort,
-    readMCP2 = false
-  ))
+    hasMbist = hasMbist
+    ))
+  val mbistPlL1 = MbistPipeline.PlaceMbistPipeline(1, s"MbistPipePtwL1", hasMbist)
   val l1v = RegInit(0.U((l2tlbParams.l1nSets * l2tlbParams.l1nWays).W))
   val l1g = Reg(UInt((l2tlbParams.l1nSets * l2tlbParams.l1nWays).W))
   val l1h = Reg(Vec(l2tlbParams.l1nSets, Vec(l2tlbParams.l1nWays, UInt(2.W))))
@@ -241,8 +242,9 @@ class PtwCache()(implicit p: Parameters) extends XSModule with HasPtwConst with 
     waySplit = 4,
     dataSplit = 2,
     singlePort = sramSinglePort,
-    readMCP2 = false
+    hasMbist = hasMbist
   ))
+  val mbistPlL0 = MbistPipeline.PlaceMbistPipeline(1, s"MbistPipePtwL0", hasMbist)
   val l0v = RegInit(0.U((l2tlbParams.l0nSets * l2tlbParams.l0nWays).W))
   val l0g = Reg(UInt((l2tlbParams.l0nSets * l2tlbParams.l0nWays).W))
   val l0h = Reg(Vec(l2tlbParams.l0nSets, Vec(l2tlbParams.l0nWays, UInt(2.W))))

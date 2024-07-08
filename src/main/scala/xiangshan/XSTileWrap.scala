@@ -24,8 +24,8 @@ import freechips.rocketchip.interrupts._
 import freechips.rocketchip.util._
 import system.HasSoCParameter
 import device.{IMSICAsync, MsiInfoBundle}
-import coupledL2.tl2chi.{PortIO, AsyncPortIO, CHIAsyncBridgeSource}
-import utility.{IntBuffer, ResetGen}
+import coupledL2.tl2chi.{AsyncPortIO, CHIAsyncBridgeSource, PortIO}
+import utility.{DFTResetSignals, IntBuffer, ResetGen}
 
 // This module is used for XSNoCTop for async time domain and divide different
 // voltage domain. Everything in this module should be in the core clock domain
@@ -121,7 +121,7 @@ class XSTileWrap()(implicit p: Parameters) extends LazyModule
       // Modules are reset one by one
       // reset ----> SYNC --> XSTile
       val resetChain = Seq(Seq(tile.module))
-      ResetGen(resetChain, reset_sync, !debugOpts.FPGAPlatform)
+      ResetGen(resetChain, reset_sync, None, !debugOpts.FPGAPlatform)
     }
     dontTouch(io.hartId)
     dontTouch(io.msiInfo)

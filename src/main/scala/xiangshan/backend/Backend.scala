@@ -23,6 +23,8 @@ import device.MsiInfoBundle
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp}
 import system.HasSoCParameter
 import utility._
+import utility.sram.{SramBroadcastBundle, SramHelper}
+//import utils.{HPerfMonitor, HasPerfEvents, PerfEvent}
 import xiangshan._
 import xiangshan.backend.Bundles.{DynInst, IssueQueueIQWakeUpBundle, LoadShouldCancel, MemExuInput, MemExuOutput, VPUCtrlSignals}
 import xiangshan.backend.ctrlblock.{DebugLSIO, LsTopdownInfo}
@@ -50,11 +52,17 @@ class Backend(val params: BackendParams)(implicit p: Parameters) extends LazyMod
   lazy val module = new BackendImp(this)
 }
 
-class BackendImp(wrapper: Backend)(implicit p: Parameters) extends LazyModuleImp(wrapper) {
+class BackendImp(wrapper: Backend)(implicit p: Parameters) extends LazyModuleImp(wrapper) with HasXSParameter {
   val io = IO(new BackendIO()(p, wrapper.params))
   io <> wrapper.inner.module.io
+
+  val cgen = if (hasMbist) Some(IO(Input(Bool()))) else None
+  if (hasMbist) {
+     wrapper.inner.module.cgen.get := cgen.get
+  }
+
   if (p(DebugOptionsKey).ResetGen) {
-    ResetGen(ResetGenNode(Seq(ModuleNode(wrapper.inner.module))), reset, sim = false)
+    ResetGen(ResetGenNode(Seq(ModuleNode(wrapper.inner.module))), reset, None, !p(DebugOptionsKey).ResetGen)
   }
 }
 
@@ -774,8 +782,8 @@ class BackendInlinedImp(override val wrapper: BackendInlined)(implicit p: Parame
         // ))
       ))
     ))
-    ResetGen(leftResetTree, reset, sim = false)
-    ResetGen(rightResetTree, reset, sim = false)
+    ResetGen(leftResetTree, reset, None, !p(DebugOptionsKey).ResetGen)
+    ResetGen(rightResetTree, reset, None, !p(DebugOptionsKey).ResetGen)
   } else {
     io.frontendReset := DontCare
   }
@@ -806,6 +814,16 @@ class BackendInlinedImp(override val wrapper: BackendInlined)(implicit p: Parame
   val perfEvents = HPerfMonitor(csrevents, allPerfInc).getPerfEvents
   csrio.perf.perfEventsBackend := VecInit(perfEvents.map(_._2.asTypeOf(new PerfEvent)))
   generatePerfEvent()
+
+  private val cg = ClockGate.getTop
+  dontTouch(cg)
+  val cgen = if(hasMbist) Some(IO(Input(Bool()))) else None
+  if(hasMbist) {
+    cg.te := cgen.get
+  } else {
+    cg.te := false.B
+  }
+
 }
 
 class BackendMemIO(implicit p: Parameters, params: BackendParams) extends XSBundle {

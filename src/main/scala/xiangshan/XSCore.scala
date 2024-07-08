@@ -26,11 +26,14 @@ import freechips.rocketchip.tile.HasFPUParameters
 import system.HasSoCParameter
 import utils._
 import utility._
+import utility.mbist.{MbistInterface, MbistPipeline}
+import utility.sram.{SramBroadcastBundle, SramHelper}
 import xiangshan.backend._
 import xiangshan.backend.fu.PMPRespBundle
 import xiangshan.cache.mmu._
 import xiangshan.frontend._
 import xiangshan.mem.L1PrefetchFuzzer
+
 import scala.collection.mutable.ListBuffer
 import xiangshan.cache.mmu.TlbRequestIO
 
@@ -97,6 +100,7 @@ class XSCoreImp(outer: XSCoreBase) extends LazyModuleImp(outer)
       val l3MissMatch = Input(Bool())
     }
   })
+  val dft_reset = IO(Input(new DFTResetSignals()))
 
   println(s"FPGAPlatform:${env.FPGAPlatform} EnableDebug:${env.EnableDebug}")
 
@@ -222,6 +226,7 @@ class XSCoreImp(outer: XSCoreBase) extends LazyModuleImp(outer)
   memBlock.io.l2_pmp_resp <> io.l2_pmp_resp
   memBlock.io.l2_hint.bits.isKeyword := io.l2_hint.bits.isKeyword
   memBlock.io.l2PfqBusy := io.l2PfqBusy
+  memBlock.io.dft_reset := dft_reset
 
   // if l2 prefetcher use stream prefetch, it should be placed in XSCore
 
@@ -243,6 +248,13 @@ class XSCoreImp(outer: XSCoreBase) extends LazyModuleImp(outer)
 
   memBlock.io.resetInFrontendBypass.fromFrontend := frontend.io.resetInFrontend
   io.resetInFrontend := memBlock.io.resetInFrontendBypass.toL2Top
+
+  val dft = if (hasMbist) Some(IO(new SramBroadcastBundle)) else None
+  if (hasMbist) {
+    memBlock.dft.get := dft.get
+    frontend.dft.get := memBlock.dft_out.get
+    backend.cgen.get := memBlock.dft_out.get.cgen
+  }
 
   if (debugOpts.ResetGen) {
     backend.reset := memBlock.io.reset_backend
