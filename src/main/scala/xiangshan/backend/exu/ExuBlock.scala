@@ -30,6 +30,8 @@ class ExuBlockImp(
 ) extends LazyModuleImp(wrapper) {
   val io = IO(new ExuBlockIO)
 
+  override val desiredName = params.getExuBlockName
+
   private val exus = wrapper.exus.map(_.module)
 
   private val ins: collection.IndexedSeq[DecoupledIO[ExuInput]] = io.in.flatten

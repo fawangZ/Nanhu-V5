@@ -26,6 +26,14 @@ case class SchdBlockParams(
 
   def isVfSchd: Boolean = schdType == VfScheduler()
 
+  def getExuBlockName: String = schdType match {
+    case IntScheduler() => "IntBlock"
+    case FpScheduler() => "FpBlock"
+    case VfScheduler() => "VecBlock"
+    case MemScheduler() => "MemBlock"
+    case _ => ""
+  }
+
   def JmpCnt: Int = issueBlockParams.map(_.JmpCnt).sum
 
   def BrhCnt: Int = issueBlockParams.map(_.BrhCnt).sum

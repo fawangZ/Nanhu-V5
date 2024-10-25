@@ -60,6 +60,8 @@ class ExeUnitImp(
 ) extends LazyModuleImp(wrapper) with HasXSParameter{
   private val fuCfgs = exuParams.fuConfigs
 
+  override val desiredName = "Exu" + fuCfgs.map(_.name.capitalize).reduce(_ + _)
+
   val io = IO(new ExeUnitIO(exuParams))
 
   val funcUnits = fuCfgs.map(cfg => {
