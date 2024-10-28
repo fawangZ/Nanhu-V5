@@ -147,7 +147,8 @@ class ITTageTable
     val update = Input(new ITTageUpdate)
   })
 
-  val SRAM_SIZE=128
+  // val SRAM_SIZE=128
+  val SRAM_SIZE=nRows
 
   val foldedWidth = if (nRows >= SRAM_SIZE) nRows / SRAM_SIZE else 1
 

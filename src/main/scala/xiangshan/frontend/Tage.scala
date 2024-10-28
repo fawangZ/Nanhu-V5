@@ -151,7 +151,7 @@ class TageBTable(implicit p: Parameters) extends XSModule with TBTParams{
   val bimAddr = new TableAddr(log2Up(BtSize), instOffsetBits)
 
   // Physical SRAM Size
-  val SRAMSize = 512
+  val SRAMSize = 256
   val foldWidth = BtSize / SRAMSize
 
   val bt = Module(
@@ -275,7 +275,7 @@ class TageTable
 
   // Physical SRAM size
   val bankSRAMSize = 512
-  val uSRAMSize = 256
+  val uSRAMSize = 512
   require(nRows % bankSRAMSize == 0)
   require(isPow2(numBr))
   val nRowsPerBr = nRows / numBr
