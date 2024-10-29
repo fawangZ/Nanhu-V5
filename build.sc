@@ -115,6 +115,16 @@ object utility extends HasChisel {
 
 }
 
+object xsUtils extends HasChisel {
+
+  override def millSourcePath = os.pwd / "xs-utils"
+
+  override def moduleDeps = super.moduleDeps ++ Seq(
+    rocketchip
+  )
+
+}
+
 object yunsuan extends HasChisel {
 
   override def millSourcePath = os.pwd / "yunsuan"
@@ -232,7 +242,7 @@ object xiangshan extends XiangShanModule with HasChisel {
 
   def fudianModule = fudian
 
-  def utilityModule = utility
+  def utilityModule = xsUtils
 
   def yunsuanModule = yunsuan
 
