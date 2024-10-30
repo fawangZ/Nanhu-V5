@@ -265,6 +265,9 @@ class BackendInlinedImp(override val wrapper: BackendInlined)(implicit p: Parame
   ctrlBlock.io.debugEnqLsq.needAlloc := memScheduler.io.memIO.get.lsqEnqIO.needAlloc
   ctrlBlock.io.debugEnqLsq.iqAccept := memScheduler.io.memIO.get.lsqEnqIO.iqAccept
   ctrlBlock.io.fromVecExcpMod.busy := vecExcpMod.o.status.busy
+  ctrlBlock.io.redirectPcRead <> pcTargetMem.io.toCtrl.redirectRead
+  ctrlBlock.io.memPredPcRead <> pcTargetMem.io.toCtrl.memPredRead
+  ctrlBlock.io.exceptionPcRead <> pcTargetMem.io.toCtrl.exceptionRead
 
   intScheduler.io.fromTop.hartId := io.fromTop.hartId
   intScheduler.io.fromCtrlBlock.flush := ctrlBlock.io.toIssueBlock.flush
@@ -713,24 +716,24 @@ class BackendInlinedImp(override val wrapper: BackendInlined)(implicit p: Parame
   io.mem.isVlsException := ctrlBlock.io.robio.exception.bits.vls
   require(io.mem.loadPcRead.size == params.LduCnt)
   io.mem.loadPcRead.zipWithIndex.foreach { case (loadPcRead, i) =>
-    loadPcRead := ctrlBlock.io.memLdPcRead(i).data
-    ctrlBlock.io.memLdPcRead(i).valid := io.mem.issueLda(i).valid
-    ctrlBlock.io.memLdPcRead(i).ptr := io.mem.issueLda(i).bits.uop.ftqPtr
-    ctrlBlock.io.memLdPcRead(i).offset := io.mem.issueLda(i).bits.uop.ftqOffset
+    loadPcRead := pcTargetMem.io.toMem.memLdPcRead(i).data
+    pcTargetMem.io.toMem.memLdPcRead(i).valid := io.mem.issueLda(i).valid
+    pcTargetMem.io.toMem.memLdPcRead(i).ptr := io.mem.issueLda(i).bits.uop.ftqPtr
+    pcTargetMem.io.toMem.memLdPcRead(i).offset := io.mem.issueLda(i).bits.uop.ftqOffset
   }
 
   io.mem.storePcRead.zipWithIndex.foreach { case (storePcRead, i) =>
-    storePcRead := ctrlBlock.io.memStPcRead(i).data
-    ctrlBlock.io.memStPcRead(i).valid := io.mem.issueSta(i).valid
-    ctrlBlock.io.memStPcRead(i).ptr := io.mem.issueSta(i).bits.uop.ftqPtr
-    ctrlBlock.io.memStPcRead(i).offset := io.mem.issueSta(i).bits.uop.ftqOffset
+    storePcRead := pcTargetMem.io.toMem.memStPcRead(i).data
+    pcTargetMem.io.toMem.memStPcRead(i).valid := io.mem.issueSta(i).valid
+    pcTargetMem.io.toMem.memStPcRead(i).ptr := io.mem.issueSta(i).bits.uop.ftqPtr
+    pcTargetMem.io.toMem.memStPcRead(i).offset := io.mem.issueSta(i).bits.uop.ftqOffset
   }
 
   io.mem.hyuPcRead.zipWithIndex.foreach( { case (hyuPcRead, i) =>
-    hyuPcRead := ctrlBlock.io.memHyPcRead(i).data
-    ctrlBlock.io.memHyPcRead(i).valid := io.mem.issueHylda(i).valid
-    ctrlBlock.io.memHyPcRead(i).ptr := io.mem.issueHylda(i).bits.uop.ftqPtr
-    ctrlBlock.io.memHyPcRead(i).offset := io.mem.issueHylda(i).bits.uop.ftqOffset
+    hyuPcRead := pcTargetMem.io.toMem.memHyPcRead(i).data
+    pcTargetMem.io.toMem.memHyPcRead(i).valid := io.mem.issueHylda(i).valid
+    pcTargetMem.io.toMem.memHyPcRead(i).ptr := io.mem.issueHylda(i).bits.uop.ftqPtr
+    pcTargetMem.io.toMem.memHyPcRead(i).offset := io.mem.issueHylda(i).bits.uop.ftqOffset
   })
 
   ctrlBlock.io.robio.robHeadLsIssue := io.mem.issueUops.map(deq => deq.fire && deq.bits.uop.robIdx === ctrlBlock.io.robio.robDeqPtr).reduce(_ || _)

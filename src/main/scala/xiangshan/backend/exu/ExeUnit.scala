@@ -334,8 +334,8 @@ class ExeUnitImp(
   io.csrio.foreach(exuio => funcUnits.foreach(fu => fu.io.csrio.foreach{
     fuio =>
       exuio <> fuio
-      fuio.exception := DelayN(exuio.exception, 2)
-      fuio.robDeqPtr := DelayN(exuio.robDeqPtr, 2)
+      fuio.exception := DelayN(exuio.exception, 1)
+      fuio.robDeqPtr := DelayN(exuio.robDeqPtr, 1)
   }))
   io.csrin.foreach(exuio => funcUnits.foreach(fu => fu.io.csrin.foreach{fuio => fuio := exuio}))
   io.csrToDecode.foreach(toDecode => funcUnits.foreach(fu => fu.io.csrToDecode.foreach(fuOut => toDecode := fuOut)))
