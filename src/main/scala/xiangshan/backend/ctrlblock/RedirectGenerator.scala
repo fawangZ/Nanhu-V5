@@ -3,7 +3,7 @@ package xiangshan.backend.ctrlblock
 import org.chipsalliance.cde.config.Parameters
 import chisel3.util._
 import chisel3._
-import utility.{HasCircularQueuePtrHelper, XORFold, GatedValidRegNext}
+import xs.utils.{HasCircularQueuePtrHelper, XORFold, GatedValidRegNext}
 import xiangshan.frontend.{FtqRead, PreDecodeInfo}
 import xiangshan.{MemPredUpdateReq, Redirect, XSBundle, XSModule}
 
