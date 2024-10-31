@@ -55,19 +55,6 @@ class PcTargetMemImp(override val wrapper: PcTargetMem)(implicit p: Parameters, 
   private val newestEn: Bool = io.fromFrontendFtq.newest_entry_en
   private val newestTarget: UInt = io.fromFrontendFtq.newest_entry_target
 
-  // for (i <- 0 until params.numTargetReadPort) {
-  //   val targetPtr = io.toDataPath.fromDataPathFtqPtr(i)
-  //   // target pc stored in next entry
-  //   targetMem.io.ren.get(i) := readValid(i)
-  //   targetMem.io.raddr(i) := (targetPtr + 1.U).value
-
-  //   val needNewestTarget = RegEnable(targetPtr === io.fromFrontendFtq.newest_entry_ptr, false.B, readValid(i))
-  //   targetPCVec(i) := Mux(
-  //     needNewestTarget,
-  //     RegEnable(newestTarget, newestEn),
-  //     targetMem.io.rdata(i).startAddr
-  //   )
-  // }
   for ((pcExuIdx, i) <- pcMemRdIndexes("numTargetReadPort").zipWithIndex) {
     val targetPtr = io.toDataPath.fromDataPathFtqPtr(i)
     // target pc stored in next entry
@@ -82,14 +69,6 @@ class PcTargetMemImp(override val wrapper: PcTargetMem)(implicit p: Parameters, 
     )
   }
 
-  // for (i <- 0 until params.numPcMemReadPort) {
-  //   val pcAddr = io.toDataPath.fromDataPathFtqPtr(i)
-  //   val offset = io.toDataPath.fromDataPathFtqOffset(i)
-  //   // pc stored in this entry
-  //   targetMem.io.ren.get(i + params.numTargetReadPort) := readValid(i)
-  //   targetMem.io.raddr(i + params.numTargetReadPort) := pcAddr.value
-  //   pcVec(i) := targetMem.io.rdata(i + params.numTargetReadPort).getPc(RegEnable(offset, readValid(i)))
-  // }
   for ((pcExuIdx, i) <- pcMemRdIndexes("numPcMemReadPort").zipWithIndex) {
     val pcAddr = io.toDataPath.fromDataPathFtqPtr(i)
     val offset = io.toDataPath.fromDataPathFtqOffset(i)

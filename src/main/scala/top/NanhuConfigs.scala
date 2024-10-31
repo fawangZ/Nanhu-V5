@@ -27,6 +27,7 @@ import huancun._
 import coupledL2._
 import coupledL2.prefetch._
 import xiangshan.frontend.icache.ICacheParameters
+import xiangshan.backend.dispatch.DispatchParameters
 
 class WithNanhuV5Config extends Config((site, here, up) =>{
   case XSTileKey => up(XSTileKey).map(_.copy(
@@ -124,7 +125,9 @@ class WithNanhuV5_3Config extends Config((site, here, up) =>{
     RobCommitWidth = 8,             // Default: 8
     RabCommitWidth = 6,             // Default: 6
     RobSize = 96,                   // Default: 160
-    RabSize = 120,                  // Default: 256
+    RabSize = 96,                  // Default: 256
+    VTypeBufferSize = 24,           // Default: 64
+    WaitTableSize = 512,             // Default: 1024
     IssueQueueSize = 16,            // Default: 24
     IssueQueueCompEntrySize = 12,    // Default: 16
     NRPhyRegs = 128,                // Default: 192
@@ -147,6 +150,16 @@ class WithNanhuV5_3Config extends Config((site, here, up) =>{
     StoreQueueSize = 32,            // Default: 64
     StoreBufferSize = 8,            // Default: 16
     LoadPipelineWidth = 2,          // Default: 3
+
+    dpParams = DispatchParameters(
+      IntDqSize = 8,
+      FpDqSize = 8,
+      LsDqSize = 8,
+      IntDqDeqWidth = 8,
+      FpDqDeqWidth = 6,
+      VecDqDeqWidth = 6,
+      LsDqDeqWidth = 6
+    ),
 
     l2tlbParameters = L2TLBParameters(
       name = "l2tlb",

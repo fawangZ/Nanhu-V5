@@ -175,6 +175,7 @@ case class XSCoreParameters
   RobSize: Int = 160,
   RabSize: Int = 256,
   VTypeBufferSize: Int = 64, // used to reorder vtype
+  WaitTableSize: Int = 1024,
   IssueQueueSize: Int = 24,
   IssueQueueCompEntrySize: Int = 16,
   dpParams: DispatchParameters = DispatchParameters(
@@ -849,7 +850,7 @@ trait HasXSParameter {
   def ResetTimeMax2Pow = 20 //1078576
   def ResetTimeMin2Pow = 10 //1024
   // wait table parameters
-  def WaitTableSize = 1024
+  def WaitTableSize = coreParams.WaitTableSize
   def MemPredPCWidth = log2Up(WaitTableSize)
   def LWTUse2BitCounter = true
   // store set parameters
