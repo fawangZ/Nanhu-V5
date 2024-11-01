@@ -30,6 +30,7 @@ import xs.utils.mbist.{MbistInterface, MbistPipeline}
 import xs.utils.sram.{SramBroadcastBundle, SramHelper}
 import xiangshan.backend._
 import xiangshan.backend.fu.PMPRespBundle
+import xiangshan.backend.trace.TraceCoreInterface
 import xiangshan.cache.mmu._
 import xiangshan.frontend._
 import xiangshan.mem.L1PrefetchFuzzer
@@ -86,6 +87,7 @@ class XSCoreImp(outer: XSCoreBase) extends LazyModuleImp(outer)
     val reset_vector = Input(UInt(PAddrBits.W))
     val cpu_halt = Output(Bool())
     val resetInFrontend = Output(Bool())
+    val traceCoreInterface = new TraceCoreInterface
     val l2_pf_enable = Output(Bool())
     val perfEvents = Input(Vec(numPCntHc * coreParams.L2NBanks + 1, new PerfEvent))
     val beu_errors = Output(new XSL1BusErrors())
@@ -245,6 +247,7 @@ class XSCoreImp(outer: XSCoreBase) extends LazyModuleImp(outer)
   io.beu_errors.dcache <> memBlock.io.error.bits.toL1BusErrorUnitInfo(memBlock.io.error.valid)
   io.beu_errors.l2 <> DontCare
   io.l2_pf_enable := memBlock.io.outer_l2_pf_enable
+  io.traceCoreInterface <> backend.io.traceCoreInterface
 
   memBlock.io.resetInFrontendBypass.fromFrontend := frontend.io.resetInFrontend
   io.resetInFrontend := memBlock.io.resetInFrontendBypass.toL2Top

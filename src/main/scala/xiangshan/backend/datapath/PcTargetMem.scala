@@ -29,7 +29,8 @@ class PcTargetMemImp(override val wrapper: PcTargetMem)(implicit p: Parameters, 
     "load"      -> params.LduCnt,
     "hybrid"    -> params.HyuCnt,
     "store"     -> (if(EnableStorePrefetchSMS) params.StaCnt else 0),
-    "exception"     -> 1
+    "exception"     -> 1,
+    "trace"      -> TraceGroupNum
   ))
 
   private val numPcMemReadForCtrlMem = pcMemRdIndexes.maxIdx
@@ -109,7 +110,11 @@ class PcTargetMemImp(override val wrapper: PcTargetMem)(implicit p: Parameters, 
     io.toMem.memStPcRead.foreach(_.data := 0.U)
   }
 
-  
+  for ((pcMemIdx, i) <- pcMemRdIndexes("trace").zipWithIndex) {
+    targetMem.io.ren.get(pcMemIdx) := io.toCtrl.tracePcRead(i).valid
+    targetMem.io.raddr(pcMemIdx) := io.toCtrl.tracePcRead(i).ptr.value
+    io.toCtrl.tracePcRead(i).data := targetMem.io.rdata(pcMemIdx).getPc(RegEnable(io.toCtrl.tracePcRead(i).offset, io.toCtrl.tracePcRead(i).valid))
+  }
 
   io.toDataPath.toDataPathTargetPC := targetPCVec
   io.toDataPath.toDataPathPC := pcVec
@@ -130,6 +135,7 @@ class PcToCtrlIO(params: BackendParams)(implicit p: Parameters) extends XSBundle
   val redirectRead = Flipped(new FtqRead(UInt(VAddrBits.W)))
   val memPredRead = Flipped(new FtqRead(UInt(VAddrBits.W)))
   val exceptionRead = Flipped(new FtqRead(UInt(VAddrBits.W)))
+  val tracePcRead = Vec(TraceGroupNum, Flipped(new FtqRead(UInt(VAddrBits.W))))
 }
 
 class PcToMemIO(params: BackendParams)(implicit p: Parameters) extends XSBundle {

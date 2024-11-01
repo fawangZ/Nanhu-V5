@@ -1697,14 +1697,23 @@ class MemBlockInlinedImp(outer: MemBlockInlined) extends LazyModuleImp(outer)
   }.elsewhen (vSegmentUnit.io.exceptionInfo.valid) {
     vSegmentException := true.B
   }
-  val atomicsExceptionAddress = RegEnable(atomicsUnit.io.exceptionInfo.bits.vaddr, atomicsUnit.io.exceptionInfo.valid)
-  val vSegmentExceptionVstart = RegEnable(vSegmentUnit.io.exceptionInfo.bits.vstart, vSegmentUnit.io.exceptionInfo.valid)
-  val vSegmentExceptionVl     = RegEnable(vSegmentUnit.io.exceptionInfo.bits.vl, vSegmentUnit.io.exceptionInfo.valid)
-  val vSegmentExceptionAddress = RegEnable(vSegmentUnit.io.exceptionInfo.bits.vaddr, vSegmentUnit.io.exceptionInfo.valid)
-  val atomicsExceptionGPAddress = RegEnable(atomicsUnit.io.exceptionInfo.bits.gpaddr, atomicsUnit.io.exceptionInfo.valid)
-  val vSegmentExceptionGPAddress = RegEnable(vSegmentUnit.io.exceptionInfo.bits.gpaddr, vSegmentUnit.io.exceptionInfo.valid)
-  val atomicsExceptionIsForVSnonLeafPTE = RegEnable(atomicsUnit.io.exceptionInfo.bits.isForVSnonLeafPTE, atomicsUnit.io.exceptionInfo.valid)
-  val vSegmentExceptionIsForVSnonLeafPTE = RegEnable(vSegmentUnit.io.exceptionInfo.bits.isForVSnonLeafPTE, vSegmentUnit.io.exceptionInfo.valid)
+  // val atomicsExceptionAddress = RegEnable(atomicsUnit.io.exceptionInfo.bits.vaddr, atomicsUnit.io.exceptionInfo.valid)
+  // val vSegmentExceptionVstart = RegEnable(vSegmentUnit.io.exceptionInfo.bits.vstart, vSegmentUnit.io.exceptionInfo.valid)
+  // val vSegmentExceptionVl     = RegEnable(vSegmentUnit.io.exceptionInfo.bits.vl, vSegmentUnit.io.exceptionInfo.valid)
+  // val vSegmentExceptionAddress = RegEnable(vSegmentUnit.io.exceptionInfo.bits.vaddr, vSegmentUnit.io.exceptionInfo.valid)
+  // val atomicsExceptionGPAddress = RegEnable(atomicsUnit.io.exceptionInfo.bits.gpaddr, atomicsUnit.io.exceptionInfo.valid)
+  // val vSegmentExceptionGPAddress = RegEnable(vSegmentUnit.io.exceptionInfo.bits.gpaddr, vSegmentUnit.io.exceptionInfo.valid)
+  // val atomicsExceptionIsForVSnonLeafPTE = RegEnable(atomicsUnit.io.exceptionInfo.bits.isForVSnonLeafPTE, atomicsUnit.io.exceptionInfo.valid)
+  // val vSegmentExceptionIsForVSnonLeafPTE = RegEnable(vSegmentUnit.io.exceptionInfo.bits.isForVSnonLeafPTE, vSegmentUnit.io.exceptionInfo.valid)
+
+  val atomicsExceptionAddress = atomicsUnit.io.exceptionInfo.bits.vaddr
+  val vSegmentExceptionVstart = vSegmentUnit.io.exceptionInfo.bits.vstart
+  val vSegmentExceptionVl     = vSegmentUnit.io.exceptionInfo.bits.vl
+  val vSegmentExceptionAddress = vSegmentUnit.io.exceptionInfo.bits.vaddr
+  val atomicsExceptionGPAddress = atomicsUnit.io.exceptionInfo.bits.gpaddr
+  val vSegmentExceptionGPAddress = vSegmentUnit.io.exceptionInfo.bits.gpaddr
+  val atomicsExceptionIsForVSnonLeafPTE = atomicsUnit.io.exceptionInfo.bits.isForVSnonLeafPTE
+  val vSegmentExceptionIsForVSnonLeafPTE = vSegmentUnit.io.exceptionInfo.bits.isForVSnonLeafPTE
 
   val exceptionVaddr = Mux(
     atomicsException,
@@ -1769,24 +1778,21 @@ class MemBlockInlinedImp(outer: MemBlockInlined) extends LazyModuleImp(outer)
     ExceptionVa
   }
 
-  io.mem_to_ooo.lsqio.vaddr := RegNext(
-    GenExceptionVa(tlbcsr.priv.dmode, tlbcsr.priv.virt || exceptionIsHyper, exceptionVaNeedExt,
+  io.mem_to_ooo.lsqio.vaddr := GenExceptionVa(tlbcsr.priv.dmode, tlbcsr.priv.virt || exceptionIsHyper, exceptionVaNeedExt,
     tlbcsr.satp, tlbcsr.vsatp, tlbcsr.hgatp, exceptionVaddr)
-  )
+  
 
   // vsegment instruction is executed atomic, which mean atomicsException and vSegmentException should not raise at the same time.
   XSError(atomicsException && vSegmentException, "atomicsException and vSegmentException raise at the same time!")
-  io.mem_to_ooo.lsqio.vstart := RegNext(Mux(vSegmentException,
+  io.mem_to_ooo.lsqio.vstart := Mux(vSegmentException,
                                             vSegmentExceptionVstart,
                                             lsq.io.exceptionAddr.vstart)
-  )
-  io.mem_to_ooo.lsqio.vl     := RegNext(Mux(vSegmentException,
+  io.mem_to_ooo.lsqio.vl     := Mux(vSegmentException,
                                             vSegmentExceptionVl,
                                             lsq.io.exceptionAddr.vl)
-  )
 
   XSError(atomicsException && atomicsUnit.io.in.valid, "new instruction before exception triggers\n")
-  io.mem_to_ooo.lsqio.gpaddr := RegNext(Mux(
+  io.mem_to_ooo.lsqio.gpaddr := Mux(
     atomicsException,
     atomicsExceptionGPAddress,
     Mux(misalignBufExceptionOverwrite,
@@ -1796,8 +1802,8 @@ class MemBlockInlinedImp(outer: MemBlockInlined) extends LazyModuleImp(outer)
         lsq.io.exceptionAddr.gpaddr
       )
     )
-  ))
-  io.mem_to_ooo.lsqio.isForVSnonLeafPTE := RegNext(Mux(
+  )
+  io.mem_to_ooo.lsqio.isForVSnonLeafPTE := Mux(
     atomicsException,
     atomicsExceptionIsForVSnonLeafPTE,
     Mux(misalignBufExceptionOverwrite,
@@ -1807,7 +1813,7 @@ class MemBlockInlinedImp(outer: MemBlockInlined) extends LazyModuleImp(outer)
         lsq.io.exceptionAddr.isForVSnonLeafPTE
       )
     )
-  ))
+  )
   io.mem_to_ooo.topToBackendBypass match { case x =>
     x.hartId            := io.hartId
     x.externalInterrupt.msip  := outer.clint_int_sink.in.head._1(0)
