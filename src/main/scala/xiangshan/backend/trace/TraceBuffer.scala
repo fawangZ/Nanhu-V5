@@ -50,7 +50,7 @@ class TraceBuffer(implicit val p: Parameters) extends Module
 
   for(i <- 0 until CommitWidth) {
     val rightHasValid = if(i == CommitWidth - 1) false.B  else (inValidVec.asUInt(CommitWidth-1, i+1).orR)
-    needPcVec(i) := inValidVec(i) & (inTypeIsNotNoneVec(i) || !rightHasValid) & !blockCommit
+    needPcVec(i) := inValidVec(i) & (inTypeIsNotNoneVec(i) || !rightHasValid) & !blockCommit || iretireSum(i) >= ((CommitWidth * RenameWidth) >> 1).U
   }
 
   val blocksUpdate = WireInit(io.in.fromRob.blocks)
