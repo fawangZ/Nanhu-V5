@@ -139,6 +139,8 @@ object huancun extends millbuild.huancun.common.HuanCunModule with HasChisel {
 
   def utilityModule: ScalaModule = utility
 
+  def xsutilsModule: ScalaModule = xsutils
+
 }
 
 object coupledL2 extends millbuild.coupledL2.common.CoupledL2Module with HasChisel {
@@ -150,6 +152,8 @@ object coupledL2 extends millbuild.coupledL2.common.CoupledL2Module with HasChis
   def utilityModule: ScalaModule = utility
 
   def huancunModule: ScalaModule = huancun
+
+  def xsutilsModule: ScalaModule = xsutils
 
 }
 
@@ -204,6 +208,8 @@ trait XiangShanModule extends ScalaModule {
 
   def utilityModule: ScalaModule
 
+  def xsutilsModule: ScalaModule
+
   def yunsuanModule: ScalaModule
 
   def macrosModule: ScalaModule
@@ -217,6 +223,7 @@ trait XiangShanModule extends ScalaModule {
     yunsuanModule,
     fudianModule,
     utilityModule,
+    xsutilsModule,
     macrosModule,
   )
 
@@ -242,7 +249,9 @@ object xiangshan extends XiangShanModule with HasChisel {
 
   def fudianModule = fudian
 
-  def utilityModule = xsutils
+  def utilityModule = utility
+
+  def xsutilsModule = xsutils
 
   def yunsuanModule = yunsuan
 

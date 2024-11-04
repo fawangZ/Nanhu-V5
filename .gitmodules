@@ -7,12 +7,6 @@
 [submodule "ready-to-run"]
 	path = ready-to-run
 	url = https://github.com/OpenXiangShan/ready-to-run
-[submodule "huancun"]
-	path = huancun
-	url = https://github.com/OpenXiangshan/huancun.git
-[submodule "coupledL2"]
-	path = coupledL2
-	url = https://github.com/OpenXiangShan/coupledL2
 [submodule "openLLC"]
 	path = openLLC
 	url = https://github.com/OpenXiangShan/OpenLLC.git
@@ -25,3 +19,9 @@
 [submodule "xs-utils"]
 	path = xs-utils
 	url = https://github.com/Siudya/xs-utils.git
+[submodule "coupledL2"]
+	path = coupledL2
+	url = https://github.com/OpenXiangShan-Nanhu/CoupledL2.git
+[submodule "huancun"]
+	path = huancun
+	url = https://github.com/OpenXiangShan-Nanhu/HuanCun.git
