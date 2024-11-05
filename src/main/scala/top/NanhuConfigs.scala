@@ -152,7 +152,7 @@ class WithNanhuV5_3Config extends Config((site, here, up) =>{
     LoadPipelineWidth = 2,          // Default: 3
 
     dpParams = DispatchParameters(
-      IntDqSize = 8,
+      IntDqSize = 16,
       FpDqSize = 8,
       LsDqSize = 8,
       IntDqDeqWidth = 8,
