@@ -82,20 +82,15 @@ class FtqNRSRAM[T <: Data](gen: T, numRead: Int)(implicit p: Parameters) extends
 
 class Ftq_RF_Components(implicit p: Parameters) extends XSBundle with BPUUtils {
   val startAddr = UInt(VAddrBits.W)
-  val nextLineAddr = UInt(VAddrBits.W)
   val isNextMask = Vec(PredictWidth, Bool())
   val fallThruError = Bool()
   // val carry = Bool()
   def getPc(offset: UInt) = {
-    def getHigher(pc: UInt) = pc(VAddrBits-1, log2Ceil(PredictWidth)+instOffsetBits+1)
-    def getOffset(pc: UInt) = pc(log2Ceil(PredictWidth)+instOffsetBits, instOffsetBits)
-    Cat(getHigher(Mux(isNextMask(offset) && startAddr(log2Ceil(PredictWidth)+instOffsetBits), nextLineAddr, startAddr)),
-        getOffset(startAddr)+offset, 0.U(instOffsetBits.W))
+    Cat(startAddr(VAddrBits-1, instOffsetBits) + offset, 0.U(instOffsetBits.W)).asTypeOf(UInt(VAddrBits.W))
   }
   def fromBranchPrediction(resp: BranchPredictionBundle) = {
     def carryPos(addr: UInt) = addr(instOffsetBits+log2Ceil(PredictWidth)+1)
     this.startAddr := resp.pc(3)
-    this.nextLineAddr := resp.pc(3) + (FetchWidth * 4 * 2).U // may be broken on other configs
     this.isNextMask := VecInit((0 until PredictWidth).map(i =>
       (resp.pc(3)(log2Ceil(PredictWidth), 1) +& i.U)(log2Ceil(PredictWidth)).asBool
     ))
