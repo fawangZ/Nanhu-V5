@@ -106,7 +106,7 @@ class Ftq_pd_Entry(implicit p: Parameters) extends XSBundle {
   val brMask = Vec(PredictWidth, Bool())
   val jmpInfo = ValidUndirectioned(Vec(3, Bool()))
   val jmpOffset = UInt(log2Ceil(PredictWidth).W)
-  val jalTarget = UInt(VAddrBits.W)
+  val jalOffset = UInt(jalOffsetWidth.W)
   val rvcMask = Vec(PredictWidth, Bool())
   def hasJal  = jmpInfo.valid && !jmpInfo.bits(0)
   def hasJalr = jmpInfo.valid && jmpInfo.bits(0)
@@ -121,7 +121,7 @@ class Ftq_pd_Entry(implicit p: Parameters) extends XSBundle {
                                              pds.map(pd => VecInit(pd.isJalr, pd.isCall, pd.isRet)))
     this.jmpOffset := ParallelPriorityEncoder(pds.map(pd => (pd.isJal || pd.isJalr) && pd.valid))
     this.rvcMask := VecInit(pds.map(pd => pd.isRVC))
-    this.jalTarget := pdWb.jalTarget
+    this.jalOffset := pdWb.jalOffset
   }
 
   def toPd(offset: UInt) = {
@@ -287,7 +287,7 @@ class FTBEntryGen(implicit p: Parameters) extends XSModule with HasBackendRedire
   when (entry_has_jmp) {
     init_entry.tailSlot.offset := pd.jmpOffset
     init_entry.tailSlot.valid := new_jmp_is_jal || new_jmp_is_jalr
-    init_entry.tailSlot.setLowerStatByTarget(io.start_addr, Mux(cfi_is_jalr, io.target, pd.jalTarget), isShare=false)
+    init_entry.tailSlot.setLowerStatByTarget(io.start_addr, Mux(cfi_is_jalr, io.target, (Cat(io.start_addr(VAddrBits-1, instOffsetBits) + pd.jmpOffset, 0.U(instOffsetBits.W))+ SignExt(pd.jalOffset, VAddrBits)).asTypeOf(UInt(VAddrBits.W))), isShare=false)
   }
 
   val jmpPft = getLower(io.start_addr) +& pd.jmpOffset +& Mux(pd.rvcMask(pd.jmpOffset), 1.U, 2.U)

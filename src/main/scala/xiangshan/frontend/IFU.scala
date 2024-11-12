@@ -101,7 +101,7 @@ class IfuToPreDecode(implicit p: Parameters) extends XSBundle {
 
 class IfuToPredChecker(implicit p: Parameters) extends XSBundle {
   val ftqOffset     = Valid(UInt(log2Ceil(PredictWidth).W))
-  val jumpOffset    = Vec(PredictWidth, UInt(XLEN.W))
+  val jumpOffset    = Vec(PredictWidth, UInt(jalOffsetWidth.W))
   val target        = UInt(VAddrBits.W)
   val instrRange    = Vec(PredictWidth, Bool())
   val instrValid    = Vec(PredictWidth, Bool())
@@ -881,7 +881,7 @@ class NewIFU(implicit p: Parameters) extends XSModule
   mmioFlushWb.bits.misOffset  := f3_mmio_missOffset
   mmioFlushWb.bits.cfiOffset  := DontCare
   mmioFlushWb.bits.target     := Mux(mmio_is_RVC, f3_ftq_req.startAddr + 2.U , f3_ftq_req.startAddr + 4.U)
-  mmioFlushWb.bits.jalTarget  := DontCare
+  mmioFlushWb.bits.jalOffset  := DontCare
   mmioFlushWb.bits.instrRange := f3_mmio_range
 
   val mmioRVCExpander = Module(new RVCExpander)
@@ -980,7 +980,7 @@ class NewIFU(implicit p: Parameters) extends XSModule
   }
 
   val checkFlushWb = Wire(Valid(new PredecodeWritebackBundle))
-  val checkFlushWbjalTargetIdx = ParallelPriorityEncoder(VecInit(wb_pd.zip(wb_instr_valid).map{case (pd, v) => v && pd.isJal }))
+  val checkFlushWbjalIdx = ParallelPriorityEncoder(VecInit(wb_pd.zip(wb_instr_valid).map{case (pd, v) => v && pd.isJal }))
   val checkFlushWbTargetIdx = ParallelPriorityEncoder(wb_check_result_stage2.fixedMissPred)
   checkFlushWb.valid                  := wb_valid
   checkFlushWb.bits.pc                := wb_pc
@@ -993,7 +993,7 @@ class NewIFU(implicit p: Parameters) extends XSModule
   checkFlushWb.bits.cfiOffset.valid   := ParallelOR(wb_check_result_stage1.fixedTaken)
   checkFlushWb.bits.cfiOffset.bits    := ParallelPriorityEncoder(wb_check_result_stage1.fixedTaken)
   checkFlushWb.bits.target            := Mux(wb_half_flush, wb_half_target, wb_check_result_stage2.fixedTarget(checkFlushWbTargetIdx))
-  checkFlushWb.bits.jalTarget         := wb_check_result_stage2.jalTarget(checkFlushWbjalTargetIdx)
+  checkFlushWb.bits.jalOffset         := wb_check_result_stage2.jalOffset(checkFlushWbjalIdx)
   checkFlushWb.bits.instrRange        := wb_instr_range.asTypeOf(Vec(PredictWidth, Bool()))
 
   toFtq.pdWb := Mux(wb_valid, checkFlushWb,  mmioFlushWb)

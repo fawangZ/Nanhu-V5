@@ -44,13 +44,13 @@ trait HasPdConst extends HasXSParameter with HasICacheParameters with HasIFUCons
     val rvc_offset = Cat(inst(12), inst(8), inst(10, 9), inst(6), inst(7), inst(2), inst(11), inst(5, 3), 0.U(1.W))
     val rvi_offset = Cat(inst(31), inst(19, 12), inst(20), inst(30, 21), 0.U(1.W))
     val max_width = rvi_offset.getWidth
-    SignExt(Mux(rvc, SignExt(rvc_offset, max_width), SignExt(rvi_offset, max_width)), XLEN)
+    SignExt(Mux(rvc, SignExt(rvc_offset, max_width), SignExt(rvi_offset, max_width)), jalOffsetWidth)
   }
   def br_offset(inst: UInt, rvc: Bool): UInt = {
     val rvc_offset = Cat(inst(12), inst(6, 5), inst(2), inst(11, 10), inst(4, 3), 0.U(1.W))
     val rvi_offset = Cat(inst(31), inst(7), inst(30, 25), inst(11, 8), 0.U(1.W))
     val max_width = rvi_offset.getWidth
-    SignExt(Mux(rvc, SignExt(rvc_offset, max_width), SignExt(rvi_offset, max_width)), XLEN)
+    SignExt(Mux(rvc, SignExt(rvc_offset, max_width), SignExt(rvi_offset, max_width)), jalOffsetWidth)
   }
 
   def NOP = "h4501".U(16.W)
@@ -87,7 +87,7 @@ class PreDecodeResp(implicit p: Parameters) extends XSBundle with HasPdConst {
   val hasHalfValid = Vec(PredictWidth, Bool())
   //val expInstr = Vec(PredictWidth, UInt(32.W))
   val instr      = Vec(PredictWidth, UInt(32.W))
-  val jumpOffset = Vec(PredictWidth, UInt(XLEN.W))
+  val jumpOffset = Vec(PredictWidth, UInt(jalOffsetWidth.W))
 //  val hasLastHalf = Bool()
   val triggered    = Vec(PredictWidth, TriggerAction())
 }
@@ -321,7 +321,7 @@ class PredCheckerResp(implicit p: Parameters) extends XSBundle with HasPdConst {
   //to Ftq write back port (stage 2)
   val stage2Out = new Bundle{
     val fixedTarget = Vec(PredictWidth, UInt(VAddrBits.W))
-    val jalTarget = Vec(PredictWidth, UInt(VAddrBits.W))
+    val jalOffset = Vec(PredictWidth, UInt(jalOffsetWidth.W))
     val fixedMissPred = Vec(PredictWidth,  Bool())
     val faultType   = Vec(PredictWidth, new CheckInfo)
   }
@@ -363,7 +363,7 @@ class PredChecker(implicit p: Parameters) extends XSModule with HasPdConst {
   notCFITaken  := VecInit(pds.zipWithIndex.map{case(pd, i) => fixedRange(i) && instrValid(i) && i.U === takenIdx && pd.notCFI && predTaken })
   invalidTaken := VecInit(pds.zipWithIndex.map{case(pd, i) => fixedRange(i) && !instrValid(i)  && i.U === takenIdx  && predTaken })
 
-  val jumpTargets          = VecInit(pds.zipWithIndex.map{case(pd,i) => (pc(i) + jumpOffset(i)).asTypeOf(UInt(VAddrBits.W))})
+  val jumpTargets          = VecInit(pds.zipWithIndex.map{case(pd,i) => (pc(i) + SignExt(jumpOffset(i), VAddrBits)).asTypeOf(UInt(VAddrBits.W))})
   val seqTargets = VecInit((0 until PredictWidth).map(i => pc(i) + Mux(pds(i).isRVC || !instrValid(i), 2.U, 4.U ) ))
 
   //Stage 2: detect target fault
@@ -374,6 +374,7 @@ class PredChecker(implicit p: Parameters) extends XSModule with HasPdConst {
   val predTakenNext  = RegEnable(predTaken, io.in.fire_in)
   val predTargetNext = RegEnable(predTarget, io.in.fire_in)
   val jumpTargetsNext = RegEnable(jumpTargets, io.in.fire_in)
+  val jumpOffsetNext = RegEnable(jumpOffset, io.in.fire_in)
   val seqTargetsNext = RegEnable(seqTargets, io.in.fire_in)
   val pdsNext = RegEnable(pds, io.in.fire_in)
   val jalFaultVecNext = RegEnable(jalFaultVec, io.in.fire_in)
@@ -392,8 +393,7 @@ class PredChecker(implicit p: Parameters) extends XSModule with HasPdConst {
 
   io.out.stage2Out.fixedMissPred.zipWithIndex.foreach{case(missPred, i ) => missPred := jalFaultVecNext(i) || retFaultVecNext(i) || notCFITakenNext(i) || invalidTakenNext(i) || targetFault(i)}
   io.out.stage2Out.fixedTarget.zipWithIndex.foreach{case(target, i) => target := Mux(jalFaultVecNext(i) || targetFault(i), jumpTargetsNext(i),  seqTargetsNext(i) )}
-  io.out.stage2Out.jalTarget.zipWithIndex.foreach{case(target, i) => target := jumpTargetsNext(i) }
-
+  io.out.stage2Out.jalOffset.zipWithIndex.foreach{case(offset, i) => offset := jumpOffsetNext(i) }
 }
 
 class FrontendTrigger(implicit p: Parameters) extends XSModule with SdtrigExt {

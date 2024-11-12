@@ -118,6 +118,7 @@ case class XSCoreParameters
   SCCtrBits: Int = 6,
   SCHistLens: Seq[Int] = Seq(0, 4, 10, 16),
   numBr: Int = 2,
+  jalOffsetWidth: Int = 21,
   branchPredictor: (BranchPredictionResp, Parameters) => Tuple2[Seq[BasePredictor], BranchPredictionResp] =
   (resp_in: BranchPredictionResp, p: Parameters) => {
     val ftb = Module(new FTB()(p))
@@ -656,6 +657,7 @@ trait HasXSParameter {
     coreParams.branchPredictor(resp_in, p)
   }
   def numBr = coreParams.numBr
+  def jalOffsetWidth = coreParams.jalOffsetWidth
   def TageTableInfos = coreParams.TageTableInfos
   def TageBanks = coreParams.numBr
   def SCNRows = coreParams.SCNRows

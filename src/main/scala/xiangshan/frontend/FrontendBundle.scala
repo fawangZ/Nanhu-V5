@@ -106,7 +106,7 @@ class PredecodeWritebackBundle(implicit p:Parameters) extends XSBundle {
   val misOffset    = ValidUndirectioned(UInt(log2Ceil(PredictWidth).W))
   val cfiOffset    = ValidUndirectioned(UInt(log2Ceil(PredictWidth).W))
   val target       = UInt(VAddrBits.W)
-  val jalTarget    = UInt(VAddrBits.W)
+  val jalOffset    = UInt(jalOffsetWidth.W)
   val instrRange   = Vec(PredictWidth, Bool())
 }
 
