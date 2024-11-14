@@ -279,7 +279,7 @@ class TageTable
   require(nRows % bankSRAMSize == 0)
   require(isPow2(numBr))
   val nRowsPerBr = nRows / numBr
-  val nBanks = 4 // Tage banks
+  val nBanks = 2 // Tage banks
   val bankSize = nRowsPerBr / nBanks
   val bankFoldWidth = if (bankSize >= bankSRAMSize) bankSize / bankSRAMSize else 1
   val uFoldedWidth = nRowsPerBr / uSRAMSize

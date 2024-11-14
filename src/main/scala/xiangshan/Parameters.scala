@@ -94,7 +94,7 @@ case class XSCoreParameters
   EnableGHistDiff: Boolean = true,
   EnableCommitGHistDiff: Boolean = true,
   UbtbSize: Int = 256,
-  FtbSize: Int = 2048,
+  FtbSize: Int = 4096,//2048,
   RasSize: Int = 16,
   RasSpecSize: Int = 32,
   RasCtrSize: Int = 3,
@@ -102,10 +102,10 @@ case class XSCoreParameters
   FtbWays: Int = 4,
   TageTableInfos: Seq[Tuple3[Int,Int,Int]] =
   //       Sets  Hist   Tag
-    Seq(( 4096,    8,    8),
-        ( 4096,   13,    8),
-        ( 4096,   32,    8),
-        ( 4096,  119,    8)),
+    Seq(( 2048,    8,    8),
+        ( 2048,   13,    8),
+        ( 2048,   32,    8),
+        ( 2048,  119,    8)),
   ITTageTableInfos: Seq[Tuple3[Int,Int,Int]] =
   //      Sets  Hist   Tag
     Seq(( 256,    4,    9),
