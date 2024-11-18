@@ -275,7 +275,7 @@ class TageTable
 
   // Physical SRAM size
   val bankSRAMSize = 512
-  val uSRAMSize = 512
+  val uSRAMSize = 256
   require(nRows % bankSRAMSize == 0)
   require(isPow2(numBr))
   val nRowsPerBr = nRows / numBr
