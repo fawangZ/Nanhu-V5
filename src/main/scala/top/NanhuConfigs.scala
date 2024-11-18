@@ -115,7 +115,7 @@ class WithNanhuV5_3Config extends Config((site, here, up) =>{
       ( 256,    8,    9),
       ( 512,   32,    9)
     ),
-
+    FtqSize = 48,                   // Default: 64
     IBufSize = 32,                  // Default: 48
     IBufNBank = 4,                  // Default: 6
     DecodeWidth = 4,                // Default: 6

@@ -180,20 +180,20 @@ class FrontendInlinedImp (outer: FrontendInlined) extends LazyModuleImp(outer)
     checkPcMem(ftq.io.toBackend.pc_mem_waddr) := ftq.io.toBackend.pc_mem_wdata
   }
 
-  val checkTargetIdx = Wire(Vec(DecodeWidth, UInt(log2Up(FtqSize).W)))
+  val checkTargetIdx = Wire(Vec(DecodeWidth, new FtqPtr))
   val checkTarget = Wire(Vec(DecodeWidth, UInt(VAddrBits.W)))
 
   for (i <- 0 until DecodeWidth) {
-    checkTargetIdx(i) := ibuffer.io.out(i).bits.ftqPtr.value
-    checkTarget(i) := Mux(ftq.io.toBackend.newest_entry_ptr.value === checkTargetIdx(i),
+    checkTargetIdx(i) := ibuffer.io.out(i).bits.ftqPtr
+    checkTarget(i) := Mux(ftq.io.toBackend.newest_entry_ptr === checkTargetIdx(i),
                         ftq.io.toBackend.newest_entry_target,
-                        checkPcMem(checkTargetIdx(i) + 1.U).startAddr)
+                        checkPcMem((checkTargetIdx(i) + 1.U).value).startAddr)
   }
 
   // commented out for this br could be the last instruction in the fetch block
   def checkNotTakenConsecutive = {
     val prevNotTakenValid = RegInit(0.B)
-    val prevNotTakenFtqIdx = Reg(UInt(log2Up(FtqSize).W))
+    val prevNotTakenFtqIdx = Reg(new FtqPtr)
     for (i <- 0 until DecodeWidth - 1) {
       // for instrs that is not the last, if a not-taken br, the next instr should have the same ftqPtr
       // for instrs that is the last, record and check next request
@@ -224,7 +224,7 @@ class FrontendInlinedImp (outer: FrontendInlined) extends LazyModuleImp(outer)
 
   def checkTakenNotConsecutive = {
     val prevTakenValid = RegInit(0.B)
-    val prevTakenFtqIdx = Reg(UInt(log2Up(FtqSize).W))
+    val prevTakenFtqIdx = Reg(new FtqPtr)
     for (i <- 0 until DecodeWidth - 1) {
       // for instrs that is not the last, if a taken br, the next instr should not have the same ftqPtr
       // for instrs that is the last, record and check next request
@@ -284,10 +284,10 @@ class FrontendInlinedImp (outer: FrontendInlined) extends LazyModuleImp(outer)
   }
 
   def checkTakenPC = {
-    val prevTakenFtqIdx = Reg(UInt(log2Up(FtqSize).W))
+    val prevTakenFtqIdx = Reg(new FtqPtr)
     val prevTakenValid = RegInit(0.B)
     val prevTakenTarget = Wire(UInt(VAddrBits.W))
-    prevTakenTarget := checkPcMem(prevTakenFtqIdx + 1.U).startAddr
+    prevTakenTarget := checkPcMem((prevTakenFtqIdx + 1.U).value).startAddr
 
     for (i <- 0 until DecodeWidth - 1) {
       when (ibuffer.io.out(i).fire && !ibuffer.io.out(i).bits.pd.notCFI && ibuffer.io.out(i).bits.pred_taken) {
