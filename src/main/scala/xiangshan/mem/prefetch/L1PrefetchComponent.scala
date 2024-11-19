@@ -6,7 +6,7 @@ import chisel3._
 import chisel3.util._
 import xiangshan._
 import utils._
-import xs.utils._
+import xs.utils.{CircularQueuePtr, GatedValidRegNext, HasCircularQueuePtrHelper, RRArbiterInit, ValidPseudoLRU, ChiselDB}
 import xs.utils.perf._
 import xs.utils.tl._
 import xiangshan.cache.HasDCacheParameters
