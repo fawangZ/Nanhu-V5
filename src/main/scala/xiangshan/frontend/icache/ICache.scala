@@ -49,8 +49,8 @@ case class ICacheParameters(
     nPrefetchMshr: Int = 10,
     nWayLookupSize: Int = 32,
     DataCodeUnit: Int = 64,
-    ICacheDataBanks: Int = 8,
-    ICacheDataSRAMWidth: Int = 66,
+    ICacheDataBanks: Int = 4,
+    ICacheDataSRAMWidth: Int = 130,
     // TODO: hard code, need delete
     partWayNum: Int = 4,
 
@@ -374,7 +374,7 @@ class ICacheDataArray(implicit p: Parameters) extends ICacheArray
       val sramBank = Module(new SRAMTemplateWithFixedWidth(
         UInt(ICacheDataEntryBits.W),
         set=nSets,
-        width=ICacheDataSRAMWidth,
+        width=ICacheDataEntryBits,
         shouldReset = true,
         holdRead = true,
         singlePort = true,

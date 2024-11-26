@@ -51,7 +51,7 @@ class FetchRequestBundle(implicit p: Parameters) extends XSBundle with HasICache
 
   def fromFtqPcBundle(b: Ftq_RF_Components) = {
     this.startAddr := b.startAddr
-    this.nextlineStart := b.nextLineAddr
+    this.nextlineStart := b.getPc(CacheLineHalfWord.U)
     // when (b.fallThruError) {
     //   val nextBlockHigherTemp = Mux(startAddr(log2Ceil(PredictWidth)+instOffsetBits), b.nextLineAddr, b.startAddr)
     //   val nextBlockHigher = nextBlockHigherTemp(VAddrBits-1, log2Ceil(PredictWidth)+instOffsetBits+1)
@@ -78,7 +78,7 @@ class FtqICacheInfo(implicit p: Parameters)extends XSBundle with HasICacheParame
   def crossCacheline =  startAddr(blockOffBits - 1) === 1.U
   def fromFtqPcBundle(b: Ftq_RF_Components) = {
     this.startAddr := b.startAddr
-    this.nextlineStart := b.nextLineAddr
+    this.nextlineStart := b.getPc(CacheLineHalfWord.U)
     this
   }
 }
@@ -107,7 +107,7 @@ class PredecodeWritebackBundle(implicit p:Parameters) extends XSBundle {
   val misOffset    = ValidUndirectioned(UInt(log2Ceil(PredictWidth).W))
   val cfiOffset    = ValidUndirectioned(UInt(log2Ceil(PredictWidth).W))
   val target       = UInt(VAddrBits.W)
-  val jalTarget    = UInt(VAddrBits.W)
+  val jalOffset    = UInt(jalOffsetWidth.W)
   val instrRange   = Vec(PredictWidth, Bool())
 }
 
