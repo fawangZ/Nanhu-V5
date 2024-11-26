@@ -38,6 +38,7 @@ trait ITTageParams extends HasXSParameter with HasBPUParameter {
   val uFoldedWidth = 16
   val TickWidth = 8
   val ITTageUsBits = 1
+  val PartTarget = 23
   def ctr_null(ctr: UInt, ctrBits: Int = ITTageCtrBits) = {
     ctr === 0.U
   }
@@ -48,7 +49,7 @@ trait ITTageParams extends HasXSParameter with HasBPUParameter {
 
   val TotalBits = ITTageTableInfos.map {
     case (s, h, t) => {
-      s * (1+t+ITTageCtrBits+ITTageUsBits+VAddrBits)
+      s * (1+t+ITTageCtrBits+ITTageUsBits+PartTarget)
     }
   }.reduce(_+_)
 }
@@ -85,8 +86,8 @@ class ITTageReq(implicit p: Parameters) extends ITTageBundle {
 
 class ITTageResp(implicit p: Parameters) extends ITTageBundle {
   val ctr = UInt(ITTageCtrBits.W)
-  val u = UInt(2.W)
-  val target = UInt(VAddrBits.W)
+  val u = UInt(ITTageUsBits.W)
+  val target = UInt(PartTarget.W)
 }
 
 class ITTageUpdate(implicit p: Parameters) extends ITTageBundle {
@@ -102,8 +103,8 @@ class ITTageUpdate(implicit p: Parameters) extends ITTageBundle {
   val u = Bool()
   val reset_u = Bool()
   // target
-  val target = UInt(VAddrBits.W)
-  val old_target = UInt(VAddrBits.W)
+  val target = UInt(PartTarget.W)
+  val old_target = UInt(PartTarget.W)
 }
 
 // reuse TAGE Implementation
@@ -116,8 +117,8 @@ class ITTageMeta(implicit p: Parameters) extends XSBundle with ITTageParams{
   val providerCtr = UInt(ITTageCtrBits.W)
   val altProviderCtr = UInt(ITTageCtrBits.W)
   val allocate = ValidUndirectioned(UInt(log2Ceil(ITTageNTables).W))
-  val providerTarget = UInt(VAddrBits.W)
-  val altProviderTarget = UInt(VAddrBits.W)
+  val providerTarget = UInt(PartTarget.W)
+  val altProviderTarget = UInt(PartTarget.W)
   // val scMeta = new SCMeta(EnableSC)
   // TODO: check if we need target info here
   val pred_cycle = if (!env.FPGAPlatform) Some(UInt(64.W)) else None
@@ -150,7 +151,8 @@ class ITTageTable
     val update = Input(new ITTageUpdate)
   })
 
-  val SRAM_SIZE=128
+  // val SRAM_SIZE=128
+  val SRAM_SIZE=nRows
 
   val foldedWidth = if (nRows >= SRAM_SIZE) nRows / SRAM_SIZE else 1
 
@@ -192,12 +194,12 @@ class ITTageTable
     val valid = Bool()
     val tag = UInt(tagLen.W)
     val ctr = UInt(ITTageCtrBits.W)
-    val target = UInt(VAddrBits.W)
+    val target = UInt(PartTarget.W)
     val useful = Bool()
   }
 
   // Why need add instOffsetBits?
-  val ittageEntrySz = 1 + tagLen + ITTageCtrBits + ITTageUsBits + VAddrBits
+  val ittageEntrySz = 1 + tagLen + ITTageCtrBits + ITTageUsBits + PartTarget
 
   // pc is start address of basic block, most 2 branch inst in block
   // def getUnhashedIdx(pc: UInt) = pc >> (instOffsetBits+log2Ceil(TageBanks))
@@ -389,8 +391,8 @@ class ITTage(implicit p: Parameters) extends BaseITTage {
   val debug_pc_s3 = RegEnable(debug_pc_s2, io.s2_fire(3))
 
   val s2_tageTarget        = Wire(UInt(VAddrBits.W))
-  val s2_providerTarget    = Wire(UInt(VAddrBits.W))
-  val s2_altProviderTarget = Wire(UInt(VAddrBits.W))
+  val s2_providerTarget    = Wire(UInt(PartTarget.W))
+  val s2_altProviderTarget = Wire(UInt(PartTarget.W))
   val s2_provided          = Wire(Bool())
   val s2_provider          = Wire(UInt(log2Ceil(ITTageNTables).W))
   val s2_altProvided       = Wire(Bool())
@@ -476,9 +478,10 @@ class ITTage(implicit p: Parameters) extends BaseITTage {
 
   val baseTarget = io.in.bits.resp_in(0).s2.full_pred(3).jalr_target // use ftb pred as base target
 
+  val s2_pc = s2_pc_dup(3).getAddr()
   s2_tageTarget := Mux1H(Seq(
-    (provided && !(providerNull && altProvided), providerInfo.target),
-    (altProvided && providerNull, altProviderInfo.target),
+    (provided && !(providerNull && altProvided), Cat(s2_pc(VAddrBits-1, PartTarget), providerInfo.target)),
+    (altProvided && providerNull, Cat(s2_pc(VAddrBits-1, PartTarget), altProviderInfo.target)),
     (!provided, baseTarget)
   ))
   s2_provided       := provided
@@ -523,6 +526,7 @@ class ITTage(implicit p: Parameters) extends BaseITTage {
 
   // Update in loop
   val updateRealTarget = update.full_target
+  val partTarget = updateRealTarget(PartTarget-1, 0)
   when (updateValid) {
     when (updateMeta.provider.valid) {
       val provider = updateMeta.provider.bits
@@ -537,7 +541,7 @@ class ITTage(implicit p: Parameters) extends BaseITTage {
         updateCorrect(altProvider) := false.B
         updateOldCtr(altProvider)  := updateMeta.altProviderCtr
         updateAlloc(altProvider)   := false.B
-        updateTarget(altProvider)  := updateRealTarget
+        updateTarget(altProvider)  := partTarget
         updateOldTarget(altProvider) := updateMeta.altProviderTarget
       }
 
@@ -546,9 +550,9 @@ class ITTage(implicit p: Parameters) extends BaseITTage {
       updateUMask(provider)  := true.B
 
       updateU(provider) := Mux(!updateMeta.altDiffers, updateMeta.providerU,
-                                updateMeta.providerTarget === updateRealTarget)
-      updateCorrect(provider)  := updateMeta.providerTarget === updateRealTarget
-      updateTarget(provider) := updateRealTarget
+                                updateMeta.providerTarget === partTarget)
+      updateCorrect(provider)  := updateMeta.providerTarget === partTarget
+      updateTarget(provider) := partTarget
       updateOldTarget(provider) := updateMeta.providerTarget
       updateOldCtr(provider) := updateMeta.providerCtr
       updateAlloc(provider)  := false.B

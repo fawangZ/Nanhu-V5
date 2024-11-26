@@ -154,7 +154,7 @@ class TageBTable(implicit p: Parameters) extends XSModule with TBTParams{
   val bimAddr = new TableAddr(log2Up(BtSize), instOffsetBits)
 
   // Physical SRAM Size
-  val SRAMSize = 512
+  val SRAMSize = 256
   val foldWidth = BtSize / SRAMSize
 
   val bt = Module(
@@ -271,7 +271,7 @@ class TageTable
   })
 
   class TageEntry() extends TageBundle {
-    val valid = Bool()
+    // val valid = Bool()
     val tag = UInt(tagLen.W)
     val ctr = UInt(TageCtrBits.W)
   }
@@ -283,7 +283,7 @@ class TageTable
   require(nRows % bankSRAMSize == 0)
   require(isPow2(numBr))
   val nRowsPerBr = nRows / numBr
-  val nBanks = 4 // Tage banks
+  val nBanks = 2 // Tage banks
   val bankSize = nRowsPerBr / nBanks
   val bankFoldWidth = if (bankSize >= bankSRAMSize) bankSize / bankSRAMSize else 1
   val uFoldedWidth = nRowsPerBr / uSRAMSize
@@ -334,7 +334,12 @@ class TageTable
 
 
   val table_banks = Seq.fill(nBanks)(
-    Module(new FoldedSRAMTemplate(new TageEntry, set=bankSize, width=bankFoldWidth, way=numBr, shouldReset=true, holdRead=true, singlePort=true, hasMbist = hasMbist)))
+    Module(new FoldedSRAMTemplate(new TageEntry, set=bankSize, width=bankFoldWidth, way=numBr, shouldReset=false, holdRead=true, singlePort=true, hasMbist = hasMbist)))
+  // Power-on reset to weak taken
+  val history_table_doing_reset = RegInit(true.B)
+  val history_table_resetRow = RegInit(0.U(log2Ceil(bankSize).W))
+  history_table_resetRow := history_table_resetRow + history_table_doing_reset
+  when (history_table_resetRow === (bankSize-1).U) { history_table_doing_reset := false.B }
 
   val (s0_idx, s0_tag) = compute_tag_and_hash(req_unhashed_idx, io.req.bits.folded_hist)
   val s0_bank_req_1h = get_bank_mask(s0_idx)
@@ -359,7 +364,8 @@ class TageTable
 
   val tables_r = table_banks.map(_.io.r.resp.data) // s1
   val unconfs = tables_r.map(r => VecInit(r.map(e => WireInit(unconf(e.ctr))))) // do unconf cal in parallel
-  val hits = tables_r.map(r => VecInit(r.map(e => e.tag === s1_tag && e.valid && !resp_invalid_by_write))) // do tag compare in parallel
+  // val hits = tables_r.map(r => VecInit(r.map(e => e.tag === s1_tag && e.valid && !resp_invalid_by_write))) // do tag compare in parallel
+  val hits = tables_r.map(r => VecInit(r.map(e => e.tag === s1_tag && !resp_invalid_by_write))) // do tag compare in parallel
 
   val resp_selected = Mux1H(s1_bank_req_1h, tables_r)
   val unconf_selected = Mux1H(s1_bank_req_1h, unconfs)
@@ -404,27 +410,37 @@ class TageTable
     ))
 
   // val silent_update_from_wrbypass = Wire(Bool())
+  val per_bank_reset_wdata = Wire(Vec(numBr, new TageEntry))
+  for (i <- 0 until numBr) {
+    // per_bank_reset_wdata(i).valid := false.B
+    per_bank_reset_wdata(i).tag := 255.U
+    per_bank_reset_wdata(i).ctr := 3.U
+
+  }
 
   for (b <- 0 until nBanks) {
     table_banks(b).io.w.apply(
-      valid   = per_bank_update_way_mask(b).orR && update_req_bank_1h(b),
-      data    = per_bank_update_wdata(b),
-      setIdx  = update_idx_in_bank,
-      waymask = per_bank_update_way_mask(b)
+      valid   = per_bank_update_way_mask(b).orR && update_req_bank_1h(b) || history_table_doing_reset,
+      // data    = per_bank_update_wdata(b),
+      // setIdx  = update_idx_in_bank,
+      // waymask = per_bank_update_way_mask(b)
+      data    = Mux(history_table_doing_reset, per_bank_reset_wdata, per_bank_update_wdata(b)),
+      setIdx  = Mux(history_table_doing_reset, history_table_resetRow, update_idx_in_bank),
+      waymask = Mux(history_table_doing_reset, Fill(numBr, 1.U(1.W)).asUInt, per_bank_update_way_mask(b))
     )
   }
 
   // Power-on reset
-  val powerOnResetState = RegInit(true.B)
-  when(us.io.r.req.ready && table_banks.map(_.io.r.req.ready).reduce(_ && _)) {
-    // When all the SRAM first reach ready state, we consider power-on reset is done
-    powerOnResetState := false.B
-  }
+  // val powerOnResetState = RegInit(true.B)
+  // when(us.io.r.req.ready && table_banks.map(_.io.r.req.ready).reduce(_ && _)) {
+  //   // When all the SRAM first reach ready state, we consider power-on reset is done
+  //   powerOnResetState := false.B
+  // }
   // Do not use table banks io.r.req.ready directly
   // All the us & table_banks are single port SRAM, ready := !wen
   // We do not want write request block the whole BPU pipeline
-  io.req.ready := !powerOnResetState
-
+  // io.req.ready := !powerOnResetState 
+  io.req.ready := !history_table_doing_reset
   val bank_conflict = (0 until nBanks).map(b => table_banks(b).io.w.req.valid && s0_bank_req_1h(b)).reduce(_||_)
   XSPerfAccumulate(f"tage_table_bank_conflict", bank_conflict)
 
@@ -477,7 +493,7 @@ class TageTable
           !silentUpdate(io.update.oldCtrs(br_lidx), io.update.takens(br_lidx))) ||
         io.update.alloc(br_lidx)
 
-      update_wdata.valid := true.B
+      // update_wdata.valid := true.B
       update_wdata.tag   := update_tag
     }
 

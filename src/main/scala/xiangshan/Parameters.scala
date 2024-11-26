@@ -95,7 +95,7 @@ case class XSCoreParameters
   EnableGHistDiff: Boolean = true,
   EnableCommitGHistDiff: Boolean = true,
   UbtbSize: Int = 256,
-  FtbSize: Int = 2048,
+  FtbSize: Int = 4096,//2048,
   RasSize: Int = 16,
   RasSpecSize: Int = 32,
   RasCtrSize: Int = 3,
@@ -103,10 +103,10 @@ case class XSCoreParameters
   FtbWays: Int = 4,
   TageTableInfos: Seq[Tuple3[Int,Int,Int]] =
   //       Sets  Hist   Tag
-    Seq(( 4096,    8,    8),
-        ( 4096,   13,    8),
-        ( 4096,   32,    8),
-        ( 4096,  119,    8)),
+    Seq(( 2048,    8,    8),
+        ( 2048,   13,    8),
+        ( 2048,   32,    8),
+        ( 2048,  119,    8)),
   ITTageTableInfos: Seq[Tuple3[Int,Int,Int]] =
   //      Sets  Hist   Tag
     Seq(( 256,    4,    9),
@@ -119,6 +119,7 @@ case class XSCoreParameters
   SCCtrBits: Int = 6,
   SCHistLens: Seq[Int] = Seq(0, 4, 10, 16),
   numBr: Int = 2,
+  jalOffsetWidth: Int = 21,
   branchPredictor: (BranchPredictionResp, Parameters) => Tuple2[Seq[BasePredictor], BranchPredictionResp] =
   (resp_in: BranchPredictionResp, p: Parameters) => {
     val ftb = Module(new FTB()(p))
@@ -667,6 +668,7 @@ trait HasXSParameter {
     coreParams.branchPredictor(resp_in, p)
   }
   def numBr = coreParams.numBr
+  def jalOffsetWidth = coreParams.jalOffsetWidth
   def TageTableInfos = coreParams.TageTableInfos
   def TageBanks = coreParams.numBr
   def SCNRows = coreParams.SCNRows
