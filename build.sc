@@ -28,6 +28,7 @@ import $file.openLLC.common
 /* for publishVersion */
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
 import de.tobiasroeser.mill.vcs.version.VcsVersion
+import java.io.{BufferedReader, InputStreamReader}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -303,8 +304,48 @@ object xiangshan extends XiangShanModule with HasChisel {
       LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd hh:mm:ss yyyy").withLocale(new Locale("en")))),
   )
 
+  def gitStatus: T[String] = {
+    val gitRevParseBuilder = new ProcessBuilder("git", "rev-parse", "HEAD")
+    val gitRevParseProcess = gitRevParseBuilder.start()
+    val shaReader = new BufferedReader(new InputStreamReader(gitRevParseProcess.getInputStream))
+    val sha = shaReader.readLine()
+
+    val gitStatusBuilder = new ProcessBuilder("git", "status", "-uno", "--porcelain")
+    val gitStatusProcess = gitStatusBuilder.start()
+    val gitStatusReader = new BufferedReader(new InputStreamReader(gitStatusProcess.getInputStream))
+    val status = gitStatusReader.readLine()
+    val gitDirty = if (status == null) 0 else 1 
+
+    val str =
+      s"""|SHA=$sha
+          |dirty=$gitDirty
+          |""".stripMargin
+    str
+  }
+
+  def packDifftestResources(destDir: os.Path): Unit = {
+    // package difftest source as resources, only git tracked files were collected
+    val difftest_srcs = os.proc("git", "ls-files").call(cwd = os.pwd / "difftest").out
+                          .text().split("\n").filter(_.nonEmpty).toSeq
+                          .map(os.RelPath(_))
+    difftest_srcs.foreach { f =>
+      os.copy(os.pwd / "difftest" / f, destDir / "difftest-src" / f, createFolders = true)
+    }
+
+    // package ready-to-run binary as resources
+    val ready_to_run = Seq("riscv64-nemu-interpreter-dual-so",
+                           "riscv64-nemu-interpreter-so",
+                           "riscv64-spike-so")
+    ready_to_run.foreach { f =>
+      os.copy(os.pwd / "ready-to-run" / f, destDir / "ready-to-run" / f, createFolders = true)
+    }
+  }
+
   override def resources = T.sources {
     os.write(T.dest / "publishVersion", publishVersion())
+    os.write(T.dest / "gitStatus", gitStatus())
+    os.write(T.dest / "gitModules", os.proc("git", "submodule", "status").call().out.text())
+    packDifftestResources(T.dest)
     super.resources() ++ Seq(PathRef(T.dest))
   }
 
