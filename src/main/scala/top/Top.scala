@@ -32,6 +32,7 @@ import device._
 import chisel3.stage.ChiselGeneratorAnnotation
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.resources.{DTS, JSON}
 import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.interrupts._
@@ -173,6 +174,7 @@ class XSTop()(implicit p: Parameters) extends BaseXSSoc() with HasSoCParameter
   }
 
   class XSTopImp(wrapper: LazyModule) extends LazyRawModuleImp(wrapper) {
+    override def provideImplicitClockToLazyChildren = true
     soc.XSTopPrefix.foreach { prefix =>
       val mod = this.toNamed
       annotate(new ChiselAnnotation {

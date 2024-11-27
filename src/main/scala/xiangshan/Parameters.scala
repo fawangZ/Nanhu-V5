@@ -50,6 +50,8 @@ import xiangshan.mem.prefetch.{PrefetcherParams, SMSParams}
 
 import scala.math.{max, min}
 
+case object XLen extends Field[Int]
+
 case object XSTileKey extends Field[Seq[XSCoreParameters]]
 
 case object XSCoreParamsKey extends Field[XSCoreParameters]

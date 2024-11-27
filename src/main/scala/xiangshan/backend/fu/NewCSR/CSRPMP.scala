@@ -6,8 +6,7 @@ import freechips.rocketchip.rocket.CSRs
 import org.chipsalliance.cde.config.Parameters
 import xiangshan.backend.fu.NewCSR.CSRDefines.{CSRROField => RO, CSRWARLField => WARL}
 import xiangshan.backend.fu.NewCSR.CSRFunc._
-import xiangshan.PMParameKey
-import freechips.rocketchip.tile.XLen
+import xiangshan.{PMParameKey,XLen}
 import CSRConfig._
 
 import scala.collection.immutable.SeqMap

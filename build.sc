@@ -18,8 +18,9 @@
 import mill._
 import scalalib._
 import $file.`rocket-chip`.common
-import $file.`rocket-chip`.cde.common
-import $file.`rocket-chip`.hardfloat.build
+import $file.`rocket-chip`.dependencies.cde.common
+import $file.`rocket-chip`.dependencies.hardfloat.common
+import $file.`rocket-chip`.dependencies.diplomacy.common
 import $file.huancun.common
 import $file.coupledL2.common
 import $file.openLLC.common
@@ -72,6 +73,10 @@ object rocketchip
 
   def cdeModule = cde
 
+  def diplomacyModule = diplomacy
+
+  def diplomacyIvy = None
+
   def mainargsIvy = ivy"com.lihaoyi::mainargs:0.7.0"
 
   def json4sJacksonIvy = ivy"org.json4s::json4s-jackson:4.0.7"
@@ -88,20 +93,36 @@ object rocketchip
   }
 
   object hardfloat
-    extends millbuild.`rocket-chip`.hardfloat.common.HardfloatModule with HasChisel {
+    extends millbuild.`rocket-chip`.dependencies.hardfloat.common.HardfloatModule with HasChisel {
 
     def scalaVersion: T[String] = T(defaultScalaVersion)
 
-    override def millSourcePath = os.pwd / "rocket-chip" / "hardfloat" / "hardfloat"
+    override def millSourcePath = os.pwd / "rocket-chip" / "dependencies" / "hardfloat" / "hardfloat"
 
   }
 
   object cde
-    extends millbuild.`rocket-chip`.cde.common.CDEModule with ScalaModule {
+    extends millbuild.`rocket-chip`.dependencies.cde.common.CDEModule with ScalaModule {
 
     def scalaVersion: T[String] = T(defaultScalaVersion)
 
-    override def millSourcePath = os.pwd / "rocket-chip" / "cde" / "cde"
+    override def millSourcePath = os.pwd / "rocket-chip" / "dependencies" / "cde" / "cde"
+  }
+
+  object diplomacy
+    extends millbuild.`rocket-chip`.dependencies.diplomacy.common.DiplomacyModule {
+
+    def scalaVersion: T[String] = T(defaultScalaVersion)
+
+    def chiselModule: Option[ScalaModule] = None
+    def chiselPluginJar: T[Option[PathRef]] = None
+    def chiselIvy: Option[Dep] = Some(defaultVersions("chisel"))
+    def chiselPluginIvy: Option[Dep] = Some(defaultVersions("chisel-plugin"))
+
+    def cdeModule = cde
+    def sourcecodeIvy = ivy"com.lihaoyi::sourcecode:0.3.1"
+    override def millSourcePath = os.pwd / "rocket-chip" / "dependencies" / "diplomacy" / "diplomacy"
+
   }
 }
 

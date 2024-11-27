@@ -198,7 +198,7 @@ clean:
 
 init:
 	git submodule update --init
-	cd rocket-chip && git submodule update --init cde hardfloat
+	cd rocket-chip && git submodule update --init
 
 bump:
 	git submodule foreach "git fetch origin&&git checkout master&&git reset --hard origin/master"
