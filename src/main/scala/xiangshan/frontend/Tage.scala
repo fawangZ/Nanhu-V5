@@ -480,7 +480,7 @@ class TageTable
       val wrbypass_ctr = wrbypass_io.hit_data(0).bits
       val wrbypass_data_valid = wrbypass_hit && wrbypass_io.hit_data(0).valid
       update_wdata.ctr :=
-        Mux(io.update.alloc(br_lidx),
+        Mux(io.update.alloc(br_lidx) && !wrbypass_hit,
           Mux(io.update.takens(br_lidx), 4.U, 3.U),
           Mux(wrbypass_data_valid,
             inc_ctr(wrbypass_ctr,               io.update.takens(br_lidx)),
