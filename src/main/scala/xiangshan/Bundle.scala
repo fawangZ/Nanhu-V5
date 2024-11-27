@@ -209,7 +209,7 @@ class CtrlSignals(implicit p: Parameters) extends XSBundle {
     isXSTrap, noSpecExec, blockBackward, flushPipe, canRobCompress, uopSplitType, selImm)
 
   def decode(inst: UInt, table: Iterable[(BitPat, List[BitPat])]): CtrlSignals = {
-    val decoder = freechips.rocketchip.rocket.DecodeLogic(inst, XDecode.decodeDefault, table, EspressoMinimizer)
+    val decoder = freechips.rocketchip.rocket.DecodeLogic(inst, XDecode.decodeDefault, table)
     allSignals zip decoder foreach { case (s, d) => s := d }
     commitType := DontCare
     this

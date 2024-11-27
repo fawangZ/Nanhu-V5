@@ -18,7 +18,6 @@ package xiangshan
 
 import chisel3.util.log2Ceil
 import org.chipsalliance.cde.config.{Field, Parameters}
-import freechips.rocketchip.tile.XLen
 import system.SoCParamsKey
 import xiangshan.backend.fu.{MMPMAConfig, MMPMAMethod}
 

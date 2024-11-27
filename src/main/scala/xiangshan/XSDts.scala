@@ -18,7 +18,7 @@
 
 package xiangshan
 
-import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.resources._
 
 trait HasXSDts {
   this: XSCore =>
