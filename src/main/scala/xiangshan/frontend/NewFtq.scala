@@ -290,6 +290,7 @@ class FTBEntryGen(implicit p: Parameters) extends XSModule with HasBackendRedire
     init_entry.tailSlot.offset := pd.jmpOffset
     init_entry.tailSlot.valid := new_jmp_is_jal || new_jmp_is_jalr
     init_entry.tailSlot.setLowerStatByTarget(io.start_addr, Mux(cfi_is_jalr, io.target, (Cat(io.start_addr(VAddrBits-1, instOffsetBits) + pd.jmpOffset, 0.U(instOffsetBits.W))+ SignExt(pd.jalOffset, VAddrBits)).asTypeOf(UInt(VAddrBits.W))), isShare=false)
+    init_entry.always_taken(numBr-1) := new_jmp_is_jalr
   }
 
   val jmpPft = getLower(io.start_addr) +& pd.jmpOffset +& Mux(pd.rvcMask(pd.jmpOffset), 1.U, 2.U)
@@ -375,9 +376,15 @@ class FTBEntryGen(implicit p: Parameters) extends XSModule with HasBackendRedire
   val old_entry_always_taken = WireInit(oe)
   val always_taken_modified_vec = Wire(Vec(numBr, Bool())) // whether modified or not
   for (i <- 0 until numBr) {
-    old_entry_always_taken.always_taken(i) :=
-      oe.always_taken(i) && io.cfiIndex.valid && oe.brValids(i) && io.cfiIndex.bits === oe.brOffset(i)
-    always_taken_modified_vec(i) := oe.always_taken(i) && !old_entry_always_taken.always_taken(i)
+    when(br_recorded_vec(0)){
+      old_entry_always_taken.always_taken(0) :=
+        oe.always_taken(0) && io.cfiIndex.valid && oe.brValids(0) && io.cfiIndex.bits === oe.brOffset(0)
+    }.elsewhen(br_recorded_vec(numBr-1)){
+      old_entry_always_taken.always_taken(0) := false.B
+      old_entry_always_taken.always_taken(numBr-1) :=
+        oe.always_taken(numBr-1) && io.cfiIndex.valid && oe.brValids(numBr-1) && io.cfiIndex.bits === oe.brOffset(numBr-1)
+    }
+    always_taken_modified_vec(i) := oe.always_taken(i) && oe.brValids(i) && !old_entry_always_taken.always_taken(i)
   }
   val always_taken_modified = always_taken_modified_vec.reduce(_||_)
 
