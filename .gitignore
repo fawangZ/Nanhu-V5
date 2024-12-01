@@ -365,3 +365,5 @@ stack.info*
 
 simulator_err.txt
 simulator_out.txt
+
+sim/

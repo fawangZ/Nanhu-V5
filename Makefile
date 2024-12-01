@@ -216,6 +216,10 @@ emu: sim-verilog
 emu-run: emu
 	$(MAKE) -C ./difftest emu-run SIM_TOP=SimTop DESIGN_DIR=$(NOOP_HOME) NUM_CORES=$(NUM_CORES) RTL_SUFFIX=$(RTL_SUFFIX)
 
+emu_rtl: sim-verilog
+	$(MAKE) -C ./difftest emu SIM_TOP=SimTop DESIGN_DIR=$(NOOP_HOME) NUM_CORES=$(NUM_CORES) RTL_SUFFIX=$(RTL_SUFFIX) \
+	WITH_DRAMSIM3=$(WITH_DRAMSIM3) EMU_TRACE=1 EMU_THREADS=16 SIMDIR=1
+
 RANDOM = $(shell echo $$RANDOM)
 RUN_BIN_DIR ?= $(ABS_WORK_DIR)/ready-to-run
 EMU_RUN_OPTS = -i $(RUN_BIN_DIR)/$(RUN_BIN)
@@ -226,16 +230,21 @@ emu_rtl-run:
 	$(shell if [ ! -e $(ABS_WORK_DIR)/sim/emu/$(RUN_BIN) ];then mkdir -p $(ABS_WORK_DIR)/sim/emu/$(RUN_BIN); fi)
 	touch ./sim/emu/$(RUN_BIN)/sim.log
 	$(shell if [ -e $(ABS_WORK_DIR)/sim/emu/$(RUN_BIN)/emu ];then rm -f $(ABS_WORK_DIR)/sim/emu/$(RUN_BIN)/emu; fi)
-	ln -s $(ABS_WORK_DIR)/build/emu $(ABS_WORK_DIR)/sim/emu/$(RUN_BIN)/emu
+	ln -s $(ABS_WORK_DIR)/sim/emu/comp/emu $(ABS_WORK_DIR)/sim/emu/$(RUN_BIN)/emu
 	cd sim/emu/$(RUN_BIN) && (./emu $(EMU_RUN_OPTS) 2> assert.log | tee sim.log)
 
 
 # vcs simulation
-simv: sim-verilog
-	$(MAKE) -C ./difftest simv SIM_TOP=SimTop DESIGN_DIR=$(NOOP_HOME) NUM_CORES=$(NUM_CORES) RTL_SUFFIX=$(RTL_SUFFIX)
+vcs-rtl:
+	$(MAKE) sim-verilog ENABLE_XPROP=1 WITH_CHISELDB=0
+
+simv: vcs-rtl
+	$(MAKE) -C ./difftest simv SIM_TOP=SimTop DESIGN_DIR=$(NOOP_HOME) NUM_CORES=$(NUM_CORES) RTL_SUFFIX=$(RTL_SUFFIX) \
+	CONSIDER_FSDB=1 ENABLE_XPROP=1 WITH_CHISELDB=0
 
 simv-run:
-	$(MAKE) -C ./difftest simv-run SIM_TOP=SimTop DESIGN_DIR=$(NOOP_HOME) NUM_CORES=$(NUM_CORES) RTL_SUFFIX=$(RTL_SUFFIX)
+	$(MAKE) -C ./difftest simv-run SIM_TOP=SimTop DESIGN_DIR=$(NOOP_HOME) NUM_CORES=$(NUM_CORES) RTL_SUFFIX=$(RTL_SUFFIX) RUN_BIN=$(RUN_BIN) RUN_BIN_DIR=$(RUN_BIN_DIR) \
+	TRACE=1 CONSIDER_FSDB=1 REF_SO=$(ABS_WORK_DIR)/ready-to-run/riscv64-nemu-interpreter-so
 
 # palladium simulation
 pldm-build: sim-verilog
@@ -251,4 +260,4 @@ include Makefile.test
 
 include src/main/scala/device/standalone/standalone_device.mk
 
-.PHONY: verilog sim-verilog emu clean help init bump bsp $(REF_SO)
+.PHONY: verilog sim-verilog vcs-rtl emu clean help init bump bsp $(REF_SO)
