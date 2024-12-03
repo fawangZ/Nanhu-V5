@@ -95,7 +95,7 @@ object EntryBundles extends HasCircularQueuePtrHelper {
 
   class EntryPayloadBundle(implicit p: Parameters) extends XSBundle {
     // passed from StaticInst
-    // val instr           = UInt(32.W)
+    val instr           = UInt(32.W)
     // val pc              = UInt(VAddrBits.W)
     // val foldpc          = UInt(MemPredPCWidth.W)
     // val exceptionVec    = ExceptionVec()
