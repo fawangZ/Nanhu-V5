@@ -342,12 +342,12 @@ class RenameTableWrapper(implicit p: Parameters) extends XSModule {
     dontTouch(vecRat.io)
   }
   for ((arch, i) <- vecRat.io.archWritePorts.zipWithIndex) {
-    arch.wen  := io.rabCommits.isCommit && io.rabCommits.commitValid(i) && io.rabCommits.info(i).vecWen
+    arch.wen  := io.rabCommits.isCommit && io.rabCommits.commitValid(i) && io.rabCommits.info(i).vecWen && !io.rabCommits.info(i).fpWen
     arch.addr := io.rabCommits.info(i).ldest
     arch.data := io.rabCommits.info(i).pdest
   }
   for ((spec, i) <- vecRat.io.specWritePorts.zipWithIndex) {
-    spec.wen  := io.rabCommits.isWalk && io.rabCommits.walkValid(i) && io.rabCommits.info(i).vecWen
+    spec.wen  := io.rabCommits.isWalk && io.rabCommits.walkValid(i) && io.rabCommits.info(i).vecWen && !io.rabCommits.info(i).fpWen
     spec.addr := io.rabCommits.info(i).ldest
     spec.data := io.rabCommits.info(i).pdest
   }
@@ -360,7 +360,7 @@ class RenameTableWrapper(implicit p: Parameters) extends XSModule {
   }
   if (backendParams.basicDebugEn) {
     for ((diff, i) <- vecRat.io.diffWritePorts.get.zipWithIndex) {
-      diff.wen := io.diffCommits.get.isCommit && io.diffCommits.get.commitValid(i) && io.diffCommits.get.info(i).vecWen
+      diff.wen := io.diffCommits.get.isCommit && io.diffCommits.get.commitValid(i) && io.diffCommits.get.info(i).vecWen && !io.diffCommits.get.info(i).fpWen
       diff.addr := io.diffCommits.get.info(i).ldest
       diff.data := io.diffCommits.get.info(i).pdest
     }
