@@ -33,7 +33,7 @@ import xiangshan.backend.fu.vector.Bundles.NumLsElem
 // for dq datamodule
   class DqBundle(implicit p: Parameters) extends XSBundle {
     // passed from StaticInst
-    // val instr           = UInt(32.W)
+    val instr           = UInt(32.W)
     // val pc              = UInt(VAddrBits.W)
     // val foldpc          = UInt(MemPredPCWidth.W)
     // val exceptionVec    = ExceptionVec()
