@@ -237,8 +237,14 @@ class TageBTable(implicit p: Parameters) extends XSModule with TBTParams{
     ).reduce(_||_)
   )).asUInt
 
+  val not_silent_update = VecInit((0 until numBr).map(i => {
+    val ctr = Mux(wrbypass.io.hit && wrbypass.io.hit_data(i).valid, wrbypass.io.hit_data(i).bits, io.update_cnt(i))
+    Cat(ctr, io.update_takens(i)) =/= 0.U && Cat(ctr, io.update_takens(i)) =/= 7.U
+  }))
+  val updateEnable = io.update_mask.zip(not_silent_update).map{ case (m, u) => m && u }.reduce(_||_)
+
   //Using WrBypass to store wdata dual ports for reading and writing to the same address.
-  val write_conflict = u_idx === s0_idx && io.update_mask.reduce(_||_) && s0_fire
+  val write_conflict = u_idx === s0_idx && updateEnable && s0_fire
   val can_write = (wrbypass.io.update_idx.get =/= s0_idx || !s0_fire) && wrbypass.io.has_conflict.get
 
   wrbypass.io.conflict_valid.get := write_conflict || (can_write && (io.update_mask.reduce(_||_) || doing_reset))
@@ -251,11 +257,13 @@ class TageBTable(implicit p: Parameters) extends XSModule with TBTParams{
   wrbypass.io.conflict_clean.get := can_write
 
   bt.io.w.apply(
-    valid = ((io.update_mask.reduce(_||_) || doing_reset) && !write_conflict) || can_write,
+    valid = (updateEnable || doing_reset) && !write_conflict || can_write,
     data = Mux(can_write, wrbypass_write_data, Mux(doing_reset, VecInit(Seq.fill(numBr)(2.U(2.W))), newCtrs)), // Weak taken
     setIdx = Mux(can_write, wrbrpass_idx, Mux(doing_reset, resetRow, u_idx)),
     waymask = Mux(can_write, wrbypass_write_waymask , Mux(doing_reset, Fill(numBr, 1.U(1.W)).asUInt, updateWayMask))
   )
+
+  XSPerfAccumulate(f"bt_write", bt.io.w.req.valid)
 }
 
 
