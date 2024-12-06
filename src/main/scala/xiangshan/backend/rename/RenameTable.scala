@@ -331,7 +331,7 @@ class RenameTableWrapper(implicit p: Parameters) extends XSModule {
 
   // debug read ports for difftest
   io.debug_vec_rat    .foreach(_ := vecRat.io.debug_rdata.get)
-  io.diff_vec_rat     .foreach(_ := vecRat.io.diff_rdata.get)
+  io.diff_vec_rat     .foreach(_ := (vecRat.io.diff_rdata).get)
   vecRat.io.readPorts <> io.vecReadPorts.flatten
   vecRat.io.redirect := io.redirect
   vecRat.io.snpt := io.snpt
