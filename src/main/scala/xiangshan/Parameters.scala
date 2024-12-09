@@ -166,7 +166,6 @@ case class XSCoreParameters
   Vl_IDX: Int = 0,
   NRPhyRegs: Int = 192,
   VirtualLoadQueueSize: Int = 72,
-  LoadQueueRARSize: Int = 72,
   LoadQueueRAWSize: Int = 64, // NOTE: make sure that LoadQueueRAWSize is power of 2.
   RollbackGroupSize: Int = 8,
   LoadQueueReplaySize: Int = 72,
@@ -768,7 +767,6 @@ trait HasXSParameter {
   def LSQLdEnqWidth = LSQEnqWidth min backendParams.numLoadDp
   def LSQStEnqWidth = LSQEnqWidth min backendParams.numStoreDp
   def VirtualLoadQueueSize = coreParams.VirtualLoadQueueSize
-  def LoadQueueRARSize = coreParams.LoadQueueRARSize
   def LoadQueueRAWSize = coreParams.LoadQueueRAWSize
   def RollbackGroupSize = coreParams.RollbackGroupSize
   def LoadQueueReplaySize = coreParams.LoadQueueReplaySize

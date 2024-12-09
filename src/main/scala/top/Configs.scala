@@ -64,7 +64,6 @@ class MinimalConfig(n: Int = 1) extends Config(
         RobCommitWidth = 8,
         FetchWidth = 4,
         VirtualLoadQueueSize = 24,
-        LoadQueueRARSize = 24,
         LoadQueueRAWSize = 12,
         LoadQueueReplaySize = 24,
         LoadUncacheBufferSize = 8,

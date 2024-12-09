@@ -59,7 +59,6 @@ class WithNanhuV5Config extends Config((site, here, up) =>{
       numWrite = None,              // Default:
     ),                              // Default:
     VirtualLoadQueueSize = 32,      // Default: 72
-    LoadQueueRARSize = 32,          // Default: 72
     LoadQueueRAWSize = 32,          // Default: 64
     LoadQueueReplaySize = 48,       // Default: 72
     LoadUncacheBufferSize = 16,     // Default: 20
@@ -100,7 +99,6 @@ class WithNanhuV5_2Config extends Config((site, here, up) =>{
       numWrite = None,              // Default:
     ),                              // Default:
     VirtualLoadQueueSize = 48,      // Default: 72
-    LoadQueueRARSize = 48,          // Default: 72
     LoadQueueRAWSize = 24,          // Default: 64
     LoadQueueReplaySize = 48,       // Default: 72
     LoadUncacheBufferSize = 8,      // Default: 20
@@ -142,7 +140,6 @@ class WithNanhuV5_3Config extends Config((site, here, up) =>{
       numWrite = None,              // Default:
     ),                              // Default:
     VirtualLoadQueueSize = 64,      // Default: 72
-    LoadQueueRARSize = 48,          // Default: 72
     LoadQueueRAWSize = 24,          // Default: 64
     LoadQueueReplaySize = 36,       // Default: 72
     LoadQueueNWriteBanks = 4,       // Default: 8
