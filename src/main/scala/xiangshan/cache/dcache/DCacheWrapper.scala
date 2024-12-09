@@ -98,12 +98,14 @@ trait HasDCacheParameters extends HasL1CacheParameters with HasL1PrefetchSourceP
   val cfg = cacheParams
 
   def encWordBits = cacheParams.dataCode.width(wordBits)
-
   def encRowBits = encWordBits * rowWords // for DuplicatedDataArray only
   def eccBits = encWordBits - wordBits
 
-  def encTagBits = cacheParams.tagCode.width(tagBits + ClientStates.width)
-  def eccTagBits = encTagBits - tagBits - ClientStates.width
+  def encTagBits = if(EnableTagEcc) cacheParams.tagCode.width(tagBits + ClientStates.width) else tagBits + ClientStates.width
+  def tagECCBits = encTagBits - tagBits - ClientStates.width
+
+  def encDataBits = if(EnableDataEcc) cacheParams.dataCode.width(DCacheSRAMRowBits) else DCacheSRAMRowBits
+  def dataECCBits = encDataBits - DCacheSRAMRowBits
 
   def blockProbeAfterGrantCycles = 8 // give the processor some time to issue a request after a grant
 
