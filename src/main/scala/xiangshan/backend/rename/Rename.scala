@@ -370,15 +370,6 @@ class Rename(implicit p: Parameters) extends XSModule with HasCircularQueuePtrHe
 
     io.out(i).valid := io.in(i).valid && intFreeList.io.canAllocate && vecFreeList.io.canAllocate && v0FreeList.io.canAllocate && vlFreeList.io.canAllocate && !io.rabCommits.isWalk
     io.out(i).bits := uops(i)
-    when (uops(i).srcType(0) === SrcType.fp) {
-      io.out(i).bits.srcType(0) := SrcType.vp
-    }
-    when (uops(i).srcType(1) === SrcType.fp) {
-      io.out(i).bits.srcType(1) := SrcType.vp
-    }
-    when (uops(i).srcType(2) === SrcType.fp) {
-      io.out(i).bits.srcType(2) := SrcType.vp
-    }
     // Todo: move these shit in decode stage
     // dirty code for fence. The lsrc is passed by imm.
     when (io.out(i).bits.fuType === FuType.fence.id.U) {
@@ -560,7 +551,6 @@ class Rename(implicit p: Parameters) extends XSModule with HasCircularQueuePtrHe
       io.out(i).bits.srcType(0) := SrcType.imm
       io.out(i).bits.imm := Cat(lui_imm, ld_imm)
     }
-
   }
 
   val genSnapshot = Cat(io.out.map(out => out.fire && out.bits.snapshot)).orR
