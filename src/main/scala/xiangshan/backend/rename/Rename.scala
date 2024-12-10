@@ -537,13 +537,13 @@ class Rename(implicit p: Parameters) extends XSModule with HasCircularQueuePtrHe
     }
     io.out(i).bits.pdest := Mux(isMove(i), io.out(i).bits.psrc(0), uops(i).pdest)
     when (uops(i).srcType(0) === SrcType.fp) {
-      io.out(i).bits.srcType(0) === SrcType.vp
+      io.out(i).bits.srcType(0) := SrcType.vp
     }
     when (uops(i).srcType(1) === SrcType.fp) {
-      io.out(i).bits.srcType(1) === SrcType.vp
+      io.out(i).bits.srcType(1) := SrcType.vp
     }
     when (uops(i).srcType(2) === SrcType.fp) {
-      io.out(i).bits.srcType(2) === SrcType.vp
+      io.out(i).bits.srcType(2) := SrcType.vp
     }
 
     // Todo: better implementation for fields reuse
