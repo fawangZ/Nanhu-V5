@@ -486,66 +486,66 @@ object VecDecoder extends DecodeConstants {
 
   val opfff: Array[(BitPat, XSDecodeBase)] = Array(
     // Scalar Float Point
-    FADD_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfadd, F, T, T, UopSplitType.SCA_SIM),
-    FADD_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfadd, F, T, T, UopSplitType.SCA_SIM),
-    FSUB_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsub, F, T, T, UopSplitType.SCA_SIM),
-    FSUB_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsub, F, T, T, UopSplitType.SCA_SIM),
-    FEQ_S  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfeq , T, F, F, UopSplitType.SCA_SIM),
-    FLT_S  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vflt , T, F, F, UopSplitType.SCA_SIM),
-    FLE_S  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfle , T, F, F, UopSplitType.SCA_SIM),
-    FEQ_D  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfeq , T, F, F, UopSplitType.SCA_SIM),
-    FLT_D  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vflt , T, F, F, UopSplitType.SCA_SIM),
-    FLE_D  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfle , T, F, F, UopSplitType.SCA_SIM),
-    FMIN_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfmin, F, T, T, UopSplitType.SCA_SIM),
-    FMIN_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfmin, F, T, T, UopSplitType.SCA_SIM),
-    FMAX_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfmax, F, T, T, UopSplitType.SCA_SIM),
-    FMAX_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfmax, F, T, T, UopSplitType.SCA_SIM),
+    FADD_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfadd, F, T, T, UopSplitType.SCA_SIM),
+    FADD_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfadd, F, T, T, UopSplitType.SCA_SIM),
+    FSUB_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsub, F, T, T, UopSplitType.SCA_SIM),
+    FSUB_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsub, F, T, T, UopSplitType.SCA_SIM),
+    FEQ_S  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfeq , T, F, F, UopSplitType.SCA_SIM),
+    FLT_S  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vflt , T, F, F, UopSplitType.SCA_SIM),
+    FLE_S  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfle , T, F, F, UopSplitType.SCA_SIM),
+    FEQ_D  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfeq , T, F, F, UopSplitType.SCA_SIM),
+    FLT_D  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vflt , T, F, F, UopSplitType.SCA_SIM),
+    FLE_D  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfle , T, F, F, UopSplitType.SCA_SIM),
+    FMIN_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfmin, F, T, T, UopSplitType.SCA_SIM),
+    FMIN_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfmin, F, T, T, UopSplitType.SCA_SIM),
+    FMAX_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfmax, F, T, T, UopSplitType.SCA_SIM),
+    FMAX_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfmax, F, T, T, UopSplitType.SCA_SIM),
     // Scalar Float Point Convert Inst.
-    FCVT_W_S  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xfv,   T, F, F, UopSplitType.SCA_SIM),
-    FCVT_WU_S -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xufv,  T, F, F, UopSplitType.SCA_SIM),
-    FCVT_L_S  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfwcvt_xfv,  T, F, F, UopSplitType.SCA_SIM),
-    FCVT_LU_S -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfwcvt_xufv, T, F, F, UopSplitType.SCA_SIM),
-    FCVT_W_D  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfncvt_xfw,  T, F, F, UopSplitType.SCA_SIM),
-    FCVT_WU_D -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfncvt_xufw, T, F, F, UopSplitType.SCA_SIM),
-    FCVT_L_D  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xfv,   T, F, F, UopSplitType.SCA_SIM),
-    FCVT_LU_D -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xufv,  T, F, F, UopSplitType.SCA_SIM),
-    FCVT_S_D  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfncvt_ffw,  F, T, T, UopSplitType.SCA_SIM),
-    FCVT_D_S  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfwcvt_ffv,  F, T, T, UopSplitType.SCA_SIM),
+    FCVT_W_S  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xfv,   T, F, F, UopSplitType.SCA_SIM),
+    FCVT_WU_S -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xufv,  T, F, F, UopSplitType.SCA_SIM),
+    FCVT_L_S  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfwcvt_xfv,  T, F, F, UopSplitType.SCA_SIM),
+    FCVT_LU_S -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfwcvt_xufv, T, F, F, UopSplitType.SCA_SIM),
+    FCVT_W_D  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfncvt_xfw,  T, F, F, UopSplitType.SCA_SIM),
+    FCVT_WU_D -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfncvt_xufw, T, F, F, UopSplitType.SCA_SIM),
+    FCVT_L_D  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xfv,   T, F, F, UopSplitType.SCA_SIM),
+    FCVT_LU_D -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfcvt_xufv,  T, F, F, UopSplitType.SCA_SIM),
+    FCVT_S_D  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfncvt_ffw,  F, T, T, UopSplitType.SCA_SIM),
+    FCVT_D_S  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.vfwcvt_ffv,  F, T, T, UopSplitType.SCA_SIM),
     //Scala Half-Precision Float Convert Inst.
-    FCVT_H_S  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_h_s,  F, T, T, UopSplitType.SCA_SIM),
-    FCVT_S_H  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_s_h,  F, T, T, UopSplitType.SCA_SIM),
-    FCVT_H_D  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_h_d,  F, T, T, UopSplitType.SCA_SIM),
-    FCVT_D_H  -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_d_h,  F, T, T, UopSplitType.SCA_SIM),
+    FCVT_H_S  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_h_s,  F, T, T, UopSplitType.SCA_SIM),
+    FCVT_S_H  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_s_h,  F, T, T, UopSplitType.SCA_SIM),
+    FCVT_H_D  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_h_d,  F, T, T, UopSplitType.SCA_SIM),
+    FCVT_D_H  -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, VfcvtType.fcvt_d_h,  F, T, T, UopSplitType.SCA_SIM),
     // Scalar Float Point f2i MV Inst.
-    FMV_X_D -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, FuOpType.FMVXF, T, F, F, UopSplitType.SCA_SIM),
-    FMV_X_W -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, FuOpType.FMVXF, T, F, F, UopSplitType.SCA_SIM),
-    FMV_X_H -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.fcvt, FuOpType.FMVXF, T, F, F, UopSplitType.SCA_SIM),
+    FMV_X_D -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, FuOpType.FMVXF, T, F, F, UopSplitType.SCA_SIM),
+    FMV_X_W -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, FuOpType.FMVXF, T, F, F, UopSplitType.SCA_SIM),
+    FMV_X_H -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.fcvt, FuOpType.FMVXF, T, F, F, UopSplitType.SCA_SIM),
     // donot wflags
-    FCLASS_S -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.falu, VfaluType.vfclass, T, F, F, UopSplitType.SCA_SIM),
-    FCLASS_D -> OPFFF(SrcType.vp, SrcType.X, SrcType.X, FuType.falu, VfaluType.vfclass, T, F, F, UopSplitType.SCA_SIM),
-    FSGNJ_S  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsgnj , F, T, T, UopSplitType.SCA_SIM),
-    FSGNJ_D  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsgnj , F, T, T, UopSplitType.SCA_SIM),
-    FSGNJX_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsgnjx, F, T, T, UopSplitType.SCA_SIM),
-    FSGNJX_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsgnjx, F, T, T, UopSplitType.SCA_SIM),
-    FSGNJN_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsgnjn, F, T, T, UopSplitType.SCA_SIM),
-    FSGNJN_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.falu, VfaluType.vfsgnjn, F, T, T, UopSplitType.SCA_SIM),
+    FCLASS_S -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.falu, VfaluType.vfclass, T, F, F, UopSplitType.SCA_SIM),
+    FCLASS_D -> OPFFF(SrcType.fp, SrcType.X, SrcType.X, FuType.falu, VfaluType.vfclass, T, F, F, UopSplitType.SCA_SIM),
+    FSGNJ_S  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsgnj , F, T, T, UopSplitType.SCA_SIM),
+    FSGNJ_D  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsgnj , F, T, T, UopSplitType.SCA_SIM),
+    FSGNJX_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsgnjx, F, T, T, UopSplitType.SCA_SIM),
+    FSGNJX_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsgnjx, F, T, T, UopSplitType.SCA_SIM),
+    FSGNJN_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsgnjn, F, T, T, UopSplitType.SCA_SIM),
+    FSGNJN_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.falu, VfaluType.vfsgnjn, F, T, T, UopSplitType.SCA_SIM),
 
-    FMUL_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.fmac , VfmaType.vfmul, F, T, T, UopSplitType.SCA_SIM),
-    FMUL_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.fmac , VfmaType.vfmul, F, T, T, UopSplitType.SCA_SIM),
+    FMUL_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.fmac , VfmaType.vfmul, F, T, T, UopSplitType.SCA_SIM),
+    FMUL_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.fmac , VfmaType.vfmul, F, T, T, UopSplitType.SCA_SIM),
 
-    FDIV_S  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.fDivSqrt, VfdivType.vfdiv , F, T, T, UopSplitType.SCA_SIM),
-    FDIV_D  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.fDivSqrt, VfdivType.vfdiv , F, T, T, UopSplitType.SCA_SIM),
-    FSQRT_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.fDivSqrt, VfdivType.vfsqrt, F, T, T, UopSplitType.SCA_SIM),
-    FSQRT_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.X, FuType.fDivSqrt, VfdivType.vfsqrt, F, T, T, UopSplitType.SCA_SIM),
+    FDIV_S  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.fDivSqrt, VfdivType.vfdiv , F, T, T, UopSplitType.SCA_SIM),
+    FDIV_D  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.fDivSqrt, VfdivType.vfdiv , F, T, T, UopSplitType.SCA_SIM),
+    FSQRT_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.fDivSqrt, VfdivType.vfsqrt, F, T, T, UopSplitType.SCA_SIM),
+    FSQRT_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.X, FuType.fDivSqrt, VfdivType.vfsqrt, F, T, T, UopSplitType.SCA_SIM),
 
-    FMADD_S  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfmacc , F, T, T, UopSplitType.SCA_SIM),
-    FMSUB_S  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfmsac , F, T, T, UopSplitType.SCA_SIM),
-    FNMADD_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfnmacc, F, T, T, UopSplitType.SCA_SIM),
-    FNMSUB_S -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfnmsac, F, T, T, UopSplitType.SCA_SIM),
-    FMADD_D  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfmacc , F, T, T, UopSplitType.SCA_SIM),
-    FMSUB_D  -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfmsac , F, T, T, UopSplitType.SCA_SIM),
-    FNMADD_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfnmacc, F, T, T, UopSplitType.SCA_SIM),
-    FNMSUB_D -> OPFFF(SrcType.vp, SrcType.vp, SrcType.vp, FuType.fmac, VfmaType.vfnmsac, F, T, T, UopSplitType.SCA_SIM),
+    FMADD_S  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfmacc , F, T, T, UopSplitType.SCA_SIM),
+    FMSUB_S  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfmsac , F, T, T, UopSplitType.SCA_SIM),
+    FNMADD_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfnmacc, F, T, T, UopSplitType.SCA_SIM),
+    FNMSUB_S -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfnmsac, F, T, T, UopSplitType.SCA_SIM),
+    FMADD_D  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfmacc , F, T, T, UopSplitType.SCA_SIM),
+    FMSUB_D  -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfmsac , F, T, T, UopSplitType.SCA_SIM),
+    FNMADD_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfnmacc, F, T, T, UopSplitType.SCA_SIM),
+    FNMSUB_D -> OPFFF(SrcType.fp, SrcType.fp, SrcType.fp, FuType.fmac, VfmaType.vfnmsac, F, T, T, UopSplitType.SCA_SIM),
   )
 
   val opfvv: Array[(BitPat, XSDecodeBase)] = Array(
@@ -650,72 +650,72 @@ object VecDecoder extends DecodeConstants {
 
   val opfvf: Array[(BitPat, XSDecodeBase)] = Array(
     // 13.2. Vector Single-Width Floating-Point Add/Subtract Instructions
-    VFADD_VF           -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfadd, F, T, F, UopSplitType.VEC_VFV),
-    VFSUB_VF           -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfpuType.vfsub , F, T, F, UopSplitType.VEC_VFV),
-    VFRSUB_VF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfpuType.vfsub , F, T, F, UopSplitType.VEC_VFV),
+    VFADD_VF           -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfadd, F, T, F, UopSplitType.VEC_VFV),
+    VFSUB_VF           -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfpuType.vfsub , F, T, F, UopSplitType.VEC_VFV),
+    VFRSUB_VF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfpuType.vfsub , F, T, F, UopSplitType.VEC_VFV),
 
     // 13.3. Vector Widening Floating-Point Add/Subtract Instructions
-    VFWADD_VF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfwadd, F, T, F, UopSplitType.VEC_VFW),
-    VFWSUB_VF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfwsub, F, T, F, UopSplitType.VEC_VFW),
-    VFWADD_WF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfwadd_w, F, T, F, UopSplitType.VEC_WFW),
-    VFWSUB_WF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfwsub_w, F, T, F, UopSplitType.VEC_WFW),
+    VFWADD_VF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfwadd, F, T, F, UopSplitType.VEC_VFW),
+    VFWSUB_VF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfwsub, F, T, F, UopSplitType.VEC_VFW),
+    VFWADD_WF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfwadd_w, F, T, F, UopSplitType.VEC_WFW),
+    VFWSUB_WF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfwsub_w, F, T, F, UopSplitType.VEC_WFW),
 
     // 13.4. Vector Single-Width Floating-Point Multiply/Divide Instructions
-    VFMUL_VF           -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfma, VfmaType.vfmul, F, T, F, UopSplitType.VEC_VFV),
-    VFDIV_VF           -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfdiv, VfdivType.vfdiv, F, T, F, UopSplitType.VEC_VFV),
-    VFRDIV_VF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfdiv, VfdivType.vfdiv, F, T, F, UopSplitType.VEC_VFV),
+    VFMUL_VF           -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfma, VfmaType.vfmul, F, T, F, UopSplitType.VEC_VFV),
+    VFDIV_VF           -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfdiv, VfdivType.vfdiv, F, T, F, UopSplitType.VEC_VFV),
+    VFRDIV_VF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfdiv, VfdivType.vfdiv, F, T, F, UopSplitType.VEC_VFV),
 
     // 13.5. Vector Widening Floating-Point Multiply
-    VFWMUL_VF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfma, VfmaType.vfmul_w, F, T, F, UopSplitType.VEC_VFW),
+    VFWMUL_VF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfma, VfmaType.vfmul_w, F, T, F, UopSplitType.VEC_VFW),
 
     // 13.6. Vector Single-Width Floating-Point Fused Multiply-Add Instructions
-    VFMACC_VF          -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfmacc , F, T, F, UopSplitType.VEC_VFV),
-    VFNMACC_VF         -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfnmacc, F, T, F, UopSplitType.VEC_VFV),
-    VFMSAC_VF          -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfmsac , F, T, F, UopSplitType.VEC_VFV),
-    VFNMSAC_VF         -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfnmsac, F, T, F, UopSplitType.VEC_VFV),
-    VFMADD_VF          -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfmadd , F, T, F, UopSplitType.VEC_VFV),
-    VFNMADD_VF         -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfnmadd, F, T, F, UopSplitType.VEC_VFV),
-    VFMSUB_VF          -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfmsub , F, T, F, UopSplitType.VEC_VFV),
-    VFNMSUB_VF         -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfnmsub, F, T, F, UopSplitType.VEC_VFV),
+    VFMACC_VF          -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfmacc , F, T, F, UopSplitType.VEC_VFV),
+    VFNMACC_VF         -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfnmacc, F, T, F, UopSplitType.VEC_VFV),
+    VFMSAC_VF          -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfmsac , F, T, F, UopSplitType.VEC_VFV),
+    VFNMSAC_VF         -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfnmsac, F, T, F, UopSplitType.VEC_VFV),
+    VFMADD_VF          -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfmadd , F, T, F, UopSplitType.VEC_VFV),
+    VFNMADD_VF         -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfnmadd, F, T, F, UopSplitType.VEC_VFV),
+    VFMSUB_VF          -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfmsub , F, T, F, UopSplitType.VEC_VFV),
+    VFNMSUB_VF         -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfnmsub, F, T, F, UopSplitType.VEC_VFV),
 
     // 13.7. Vector Widening Floating-Point Fused Multiply-Add Instructions
-    VFWMACC_VF         -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfmacc_w , F, T, F, UopSplitType.VEC_VFW),
-    VFWNMACC_VF        -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfnmacc_w, F, T, F, UopSplitType.VEC_VFW),
-    VFWMSAC_VF         -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfmsac_w , F, T, F, UopSplitType.VEC_VFW),
-    VFWNMSAC_VF        -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfma, VfmaType.vfnmsac_w, F, T, F, UopSplitType.VEC_VFW),
+    VFWMACC_VF         -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfmacc_w , F, T, F, UopSplitType.VEC_VFW),
+    VFWNMACC_VF        -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfnmacc_w, F, T, F, UopSplitType.VEC_VFW),
+    VFWMSAC_VF         -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfmsac_w , F, T, F, UopSplitType.VEC_VFW),
+    VFWNMSAC_VF        -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfma, VfmaType.vfnmsac_w, F, T, F, UopSplitType.VEC_VFW),
 
     // 13.11. Vector Floating-Point MIN/MAX Instructions
-    VFMIN_VF           -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfmin, F, T, F, UopSplitType.VEC_VFV),
-    VFMAX_VF           -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfmax, F, T, F, UopSplitType.VEC_VFV),
+    VFMIN_VF           -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfmin, F, T, F, UopSplitType.VEC_VFV),
+    VFMAX_VF           -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfmax, F, T, F, UopSplitType.VEC_VFV),
 
     // 13.12. Vector Floating-Point Sign-Injection Instructions
-    VFSGNJ_VF          -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfpuType.vfsgnj , F, T, F, UopSplitType.VEC_VFV),
-    VFSGNJN_VF         -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfpuType.vfsgnjn, F, T, F, UopSplitType.VEC_VFV),
-    VFSGNJX_VF         -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfpuType.vfsgnjx, F, T, F, UopSplitType.VEC_VFV),
+    VFSGNJ_VF          -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfpuType.vfsgnj , F, T, F, UopSplitType.VEC_VFV),
+    VFSGNJN_VF         -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfpuType.vfsgnjn, F, T, F, UopSplitType.VEC_VFV),
+    VFSGNJX_VF         -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfpuType.vfsgnjx, F, T, F, UopSplitType.VEC_VFV),
 
     // 13.13. Vector Floating-Point Compare Instructions
-    VMFEQ_VF           -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfalu, VfaluType.vfeq, F, F, T, UopSplitType.VEC_VFM),
-    VMFNE_VF           -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfalu, VfaluType.vfne, F, F, T, UopSplitType.VEC_VFM),
-    VMFLT_VF           -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfalu, VfaluType.vflt, F, F, T, UopSplitType.VEC_VFM),
-    VMFLE_VF           -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfalu, VfaluType.vfle, F, F, T, UopSplitType.VEC_VFM),
-    VMFGT_VF           -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfalu, VfaluType.vfgt, F, F, T, UopSplitType.VEC_VFM),
-    VMFGE_VF           -> OPFVF(SrcType.vp, SrcType.vp, FuType.vfalu, VfaluType.vfge, F, F, T, UopSplitType.VEC_VFM),
+    VMFEQ_VF           -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfalu, VfaluType.vfeq, F, F, T, UopSplitType.VEC_VFM),
+    VMFNE_VF           -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfalu, VfaluType.vfne, F, F, T, UopSplitType.VEC_VFM),
+    VMFLT_VF           -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfalu, VfaluType.vflt, F, F, T, UopSplitType.VEC_VFM),
+    VMFLE_VF           -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfalu, VfaluType.vfle, F, F, T, UopSplitType.VEC_VFM),
+    VMFGT_VF           -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfalu, VfaluType.vfgt, F, F, T, UopSplitType.VEC_VFM),
+    VMFGE_VF           -> OPFVF(SrcType.fp, SrcType.vp, FuType.vfalu, VfaluType.vfge, F, F, T, UopSplitType.VEC_VFM),
 
     // 13.15. Vector Floating-Point Merge Instruction
-    VFMERGE_VFM        -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfmerge, F, T, F, UopSplitType.VEC_VFV),
+    VFMERGE_VFM        -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfmerge, F, T, F, UopSplitType.VEC_VFV),
 
     // 13.16. Vector Floating-Point Move Instruction
-    VFMV_V_F           -> OPFVF(SrcType.vp, SrcType.vp , FuType.vfalu, VfaluType.vfmv, F, T, F, UopSplitType.VEC_VFV, src2 = SrcType.X), // vfmv.v.f vd, rs1 # vd[i] = f[rs1]
+    VFMV_V_F           -> OPFVF(SrcType.fp, SrcType.vp , FuType.vfalu, VfaluType.vfmv, F, T, F, UopSplitType.VEC_VFV, src2 = SrcType.X), // vfmv.v.f vd, rs1 # vd[i] = f[rs1]
 
     // 16.2. Floating-Point Scalar Move Instructions
     VFMV_F_S           -> OPFVF(SrcType.X, SrcType.X, FuType.vfalu, VfaluType.vfmv_f_s, T, F, F, UopSplitType.dummy), // f[rd] = vs2[0] (rs1=0)
-    VFMV_S_F           -> OPFVF(SrcType.vp, SrcType.X, FuType.vfalu, VfaluType.vfmv_s_f, F, T, F, UopSplitType.VEC_0XV, src2 = SrcType.X), // vd[0] = f[rs1] (vs2=0)
+    VFMV_S_F           -> OPFVF(SrcType.fp, SrcType.X, FuType.vfalu, VfaluType.vfmv_s_f, F, T, F, UopSplitType.VEC_0XV, src2 = SrcType.X), // vd[0] = f[rs1] (vs2=0)
     // 16.3.3. Vector Slide1up
-    VFSLIDE1UP_VF      -> OPFVF(SrcType.vp, SrcType.vp , FuType.vppu, VpermType.vfslide1up, F, T, F, UopSplitType.VEC_FSLIDE1UP),// vd[0]=f[rs1], vd[i+1] = vs2[i]
+    VFSLIDE1UP_VF      -> OPFVF(SrcType.fp, SrcType.vp , FuType.vppu, VpermType.vfslide1up, F, T, F, UopSplitType.VEC_FSLIDE1UP),// vd[0]=f[rs1], vd[i+1] = vs2[i]
 
     // 16.3.4. Vector Slide1down Instruction
     // vslide1down.vx vd, vs2, rs1, vm # vd[i] = vs2[i+1], vd[vl-1]=x[rs1]
-    VFSLIDE1DOWN_VF    -> OPFVF(SrcType.vp, SrcType.vp , FuType.vppu, VpermType.vfslide1down, F, T, F, UopSplitType.VEC_FSLIDE1DOWN),// vd[i] = vs2[i+1], vd[vl-1]=f[rs1]
+    VFSLIDE1DOWN_VF    -> OPFVF(SrcType.fp, SrcType.vp , FuType.vppu, VpermType.vfslide1down, F, T, F, UopSplitType.VEC_FSLIDE1DOWN),// vd[i] = vs2[i+1], vd[vl-1]=f[rs1]
   )
 
   val vset: Array[(BitPat, XSDecodeBase)] = Array(
