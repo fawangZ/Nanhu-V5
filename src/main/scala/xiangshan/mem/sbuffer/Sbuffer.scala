@@ -777,11 +777,6 @@ class Sbuffer(implicit p: Parameters)
     val inflight_tag_matches = widthMap(w => tag_matches(w) && inflightMask(w))
     val line_offset_mask = UIntToOH(getVWordOffset(forward.paddr))
 
-    val valid_tag_match_reg = valid_tag_matches.map(RegEnable(_, forward.valid))
-    val inflight_tag_match_reg = (0 until StoreBufferSize).map { i =>
-      RegEnable(inflight_tag_matches(i),forward.valid) && Mux(RegNext(io.dcache.refill_row_data.valid), !RegNext(refill_id(i)), true.B)
-    }
-
     val candidate_mask = VecInit(mask.map(entry => entry(getVWordOffset(forward.paddr))))
     val candidate_data = VecInit(data.map(entry => entry(getVWordOffset(forward.paddr))))
 
@@ -793,10 +788,10 @@ class Sbuffer(implicit p: Parameters)
     )
 
     val selectedInflightMask = RegEnable(
-      Mux1H(inflight_tag_match_reg, candidate_mask), forward.valid
+      Mux1H(inflight_tag_matches, candidate_mask), forward.valid
     )
     val selectedInflightData = RegEnable(
-      Mux1H(inflight_tag_match_reg, candidate_data), forward.valid
+      Mux1H(inflight_tag_matches, candidate_data), forward.valid
     )
 
     // currently not being used
