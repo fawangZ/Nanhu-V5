@@ -18,6 +18,7 @@ package xiangshan.mem
 
 import org.chipsalliance.cde.config.Parameters
 import chisel3._
+import chisel3.experimental.prefix
 import chisel3.util._
 import utils._
 import xs.utils._
@@ -151,6 +152,51 @@ class LoadQueueTopDownIO(implicit p: Parameters) extends XSBundle {
   val robHeadOtherReplay = Output(Bool())
 }
 
+
+object PipeWithName {
+  def apply[T <: Data](enqValid: Bool, enqBits: T, latency: Int, name: String): Valid[T] = {
+    require(latency >= 0, "Pipe latency must be greater than or equal to zero!")
+    if (latency == 0) {
+      val out = Wire(Valid(chiselTypeOf(enqBits)))
+      out.valid := enqValid
+      out.bits := enqBits
+      out
+    } else {
+      prefix(name) {
+        val v = RegNext(enqValid, false.B)
+        val b = RegEnable(enqBits, enqValid)
+        apply(v, b, latency - 1, name)
+      }
+    }
+  }
+
+  def apply[T <: Data](enqValid: Bool, enqBits: T ,name: String): Valid[T] = {
+    apply(enqValid, enqBits, 1, name)
+  }
+
+  def apply[T <: Data](enq: Valid[T], latency: Int = 1, name: String): Valid[T] = {
+    apply(enq.valid, enq.bits, latency, name)
+  }
+}
+
+
+object PipeDup {
+  def apply[T <: Data](useName: String, dupNames: List[String], d: ValidIO[T]): Map[String, ValidIO[T]] = {
+    dupNames.map { name =>
+      name -> PipeWithName(d, name = useName + "_dup_" + name)
+    }.toMap
+  }
+}
+
+object RegDup{
+  def apply[T <: Data](useName: String, dupNames: List[String], d: T, needInit: Boolean = false): Map[String, T] = {
+    val reg = if (needInit) RegNext(d, 0.U.asTypeOf(d)) else RegNext(d)
+    dupNames.zipWithIndex.map { case (name, _) =>
+      name -> reg.suggestName(useName + "_dup_" + name)
+    }.toMap
+  }
+}
+
 class LoadQueue(implicit p: Parameters) extends XSModule
   with HasDCacheParameters
   with HasCircularQueuePtrHelper
@@ -183,11 +229,9 @@ class LoadQueue(implicit p: Parameters) extends XSModule
     val ldout = DecoupledIO(new MemExuOutput)
     val ld_raw_data = Output(new LoadDataFromLQBundle)
     val replay = Vec(LoadPipelineWidth, Decoupled(new LsPipelineBundle))
-  //  val refill = Flipped(ValidIO(new Refill))
     val tl_d_channel  = Input(new DcacheToLduForwardIO)
     val release = Flipped(Valid(new Release))
     val nuke_rollback = Vec(StorePipelineWidth, Output(Valid(new Redirect)))
-    // val nack_rollback = Output(Valid(new Redirect))
     val rob = Flipped(new RobLsqIO)
     val uncache = new UncacheWordIO
     val exceptionAddr = new ExceptionAddrIO
@@ -212,24 +256,14 @@ class LoadQueue(implicit p: Parameters) extends XSModule
   val loadQueueReplay = Module(new LoadQueueReplay)  //  enqueue if need replay
   val virtualLoadQueue = Module(new VirtualLoadQueue)  //  control state
   val exceptionBuffer = Module(new LqExceptionBuffer) // exception buffer
-  // val uncacheBuffer = Module(new UncacheBuffer) // uncache buffer
-  /**
-   * LoadQueueRAR
-   */
-  // loadQueueRAR.io.redirect  <> io.redirect
-  // loadQueueRAR.io.vecFeedback <> io.vecFeedback
-  // loadQueueRAR.io.release   <> io.release
-  // loadQueueRAR.io.ldWbPtr   <> virtualLoadQueue.io.ldWbPtr
-  // for (w <- 0 until LoadPipelineWidth) {
-  //   loadQueueRAR.io.query(w).req    <> io.ldu.ldld_nuke_query(w).req // from load_s1
-  //   loadQueueRAR.io.query(w).resp   <> io.ldu.ldld_nuke_query(w).resp // to load_s2
-  //   loadQueueRAR.io.query(w).revoke := io.ldu.ldld_nuke_query(w).revoke // from load_s3
-  // }
+
+  val redirectDupName = List("loadQueueRAW", "loadQueueReplay", "virtualLoadQueue", "exceptionBuffer")
+  val redirectReg = PipeDup("redirect", redirectDupName, io.redirect)
 
   /**
    * LoadQueueRAW
    */
-  loadQueueRAW.io.redirect         <> io.redirect
+  loadQueueRAW.io.redirect := redirectReg("loadQueueRAW")
   loadQueueRAW.io.vecFeedback      <> io.vecFeedback
   loadQueueRAW.io.storeIn          <> io.sta.storeAddrIn
   loadQueueRAW.io.stAddrReadySqPtr <> io.sq.stAddrReadySqPtr
@@ -243,7 +277,7 @@ class LoadQueue(implicit p: Parameters) extends XSModule
   /**
    * VirtualLoadQueue
    */
-  virtualLoadQueue.io.redirect      <> io.redirect
+  virtualLoadQueue.io.redirect := redirectReg("virtualLoadQueue")
   virtualLoadQueue.io.vecCommit     <> io.vecFeedback
   virtualLoadQueue.io.enq           <> io.enq
   virtualLoadQueue.io.ldin          <> io.ldu.ldin // from load_s3
@@ -262,7 +296,7 @@ class LoadQueue(implicit p: Parameters) extends XSModule
   /**
    * Load queue exception buffer
    */
-  exceptionBuffer.io.redirect <> io.redirect
+  exceptionBuffer.io.redirect := redirectReg("exceptionBuffer")
   for (i <- 0 until LoadPipelineWidth) {
     exceptionBuffer.io.req(i).valid := io.ldu.ldin(i).valid && !io.ldu.ldin(i).bits.isvec // from load_s3
     exceptionBuffer.io.req(i).bits := io.ldu.ldin(i).bits
@@ -291,7 +325,6 @@ class LoadQueue(implicit p: Parameters) extends XSModule
   /**
    * Load uncache buffer
    */
-  // uncacheBuffer.io.redirect   <> io.redirect
   loadQueueReplay.io.ldout      <> io.ldout
   loadQueueReplay.io.ld_raw_data  <> io.ld_raw_data
   loadQueueReplay.io.rob        <> io.rob
@@ -310,7 +343,7 @@ class LoadQueue(implicit p: Parameters) extends XSModule
   /**
    * LoadQueueReplay
    */
-  loadQueueReplay.io.redirect         <> io.redirect
+  loadQueueReplay.io.redirect := redirectReg("loadQueueReplay")
   loadQueueReplay.io.enq              <> io.ldu.ldin // from load_s3
   loadQueueReplay.io.storeAddrIn      <> io.sta.storeAddrIn // from store_s1
   loadQueueReplay.io.storeDataIn      <> io.std.storeDataIn // from store_s0

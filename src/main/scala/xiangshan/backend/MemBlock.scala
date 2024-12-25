@@ -595,32 +595,8 @@ class MemBlockInlinedImp(outer: MemBlockInlined) extends LazyModuleImp(outer)
   val DTLB_PORT_START_SMS = LduCnt + StaCnt + 1
   val DTLB_PORT_START_STRIDE = LduCnt + StaCnt + 2
 
-  val dtlb_all = Module(new TLBNonBlock(DTLB_PORT_NUM, 2, ldtlbParams))
-
-//  val dtlb_ld_tlb_ld = Module(new TLBNonBlock(LduCnt + HyuCnt + 1, 2, ldtlbParams))
-//  val dtlb_st_tlb_st = Module(new TLBNonBlock(StaCnt, 1, sttlbParams))
-//  val dtlb_prefetch_tlb_prefetch = Module(new TLBNonBlock(2, 2, pftlbParams))
-//  val dtlb_ld = Seq(dtlb_ld_tlb_ld.io)
-//  val dtlb_st = Seq(dtlb_st_tlb_st.io)
-//  val dtlb_prefetch = Seq(dtlb_prefetch_tlb_prefetch.io)
-  /* tlb vec && constant variable */
-//  val dtlb = dtlb_ld ++ dtlb_st ++ dtlb_prefetch
+  val dtlb_all = Module(new TLBNonBlock(DTLB_PORT_NUM, 2, dtlbParams))
   val dtlbIO = dtlb_all.io
-
-//  val (dtlb_ld_idx, dtlb_st_idx, dtlb_pf_idx) = (0, 1, 2)
-//  val TlbSubSizeVec = Seq(LduCnt + HyuCnt + 1, StaCnt, 2) // (load + hyu + stream pf, store, sms+l2bop)
-//  val DTlbSize = TlbSubSizeVec.sum
-//  val TlbStartVec = TlbSubSizeVec.scanLeft(0)(_ + _).dropRight(1)
-//  val TlbEndVec = TlbSubSizeVec.scanLeft(0)(_ + _).drop(1)
-
-//  val ptwio = Wire(new VectorTlbPtwIO(DTlbSize))
-//  val dtlb_reqs = dtlb.map(_.requestor).flatten
-//  val dtlb_pmps = dtlb.map(_.pmp).flatten
-//  dtlb.map(_.hartId := io.hartId)
-//  dtlb.map(_.sfence := sfence)
-//  dtlb.map(_.csr := tlbcsr)
-//  dtlb.map(_.flushPipe.map(a => a := false.B)) // non-block doesn't need
-//  dtlb.map(_.redirect := redirect)
 
   val DTlbSize = DTLB_PORT_NUM
   val ptwio = Wire(new VectorTlbPtwIO(DTlbSize))
@@ -643,81 +619,26 @@ class MemBlockInlinedImp(outer: MemBlockInlined) extends LazyModuleImp(outer)
   val dtlb_ld0_tlbreplay_reg = GatedValidRegNext(dtlbIO.tlbreplay)
 
   dontTouch(tlbreplay)
-//  for (i <- 0 until LdExuCnt) {
-//    tlbreplay(i) := dtlb_ld(0).ptw.req(i).valid && ptw_resp_next.vector(0) && ptw_resp_v &&
-//      ptw_resp_next.data.hit(dtlb_ld(0).ptw.req(i).bits.vpn, tlbcsr.satp.asid, tlbcsr.vsatp.asid, tlbcsr.hgatp.vmid, allType = true, ignoreAsid = true)
-//  }
   for (i <- 0 until LdExuCnt) {
     tlbreplay(i) := dtlbIO.ptw.req(i).valid && ptw_resp_next.vector(0) && ptw_resp_v &&
       ptw_resp_next.data.hit(dtlbIO.ptw.req(i).bits.vpn, tlbcsr.satp.asid, tlbcsr.vsatp.asid, tlbcsr.hgatp.vmid, allType = true, ignoreAsid = true)
   }
 
 
-//  dtlbIO.flatMap(a => a.ptw.req)
-//    .zipWithIndex
-//    .foreach{ case (tlb, i) =>
-//      tlb.ready := ptwio.req(i).ready
-//      ptwio.req(i).bits := tlb.bits
-//    val vector_hit = if (refillBothTlb) Cat(ptw_resp_next.vector).orR
-//      else if (i < TlbEndVec(dtlb_ld_idx)) Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_ld_idx), TlbEndVec(dtlb_ld_idx))).orR
-//      else if (i < TlbEndVec(dtlb_st_idx)) Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_st_idx), TlbEndVec(dtlb_st_idx))).orR
-//      else                                 Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_pf_idx), TlbEndVec(dtlb_pf_idx))).orR
-//    ptwio.req(i).valid := tlb.valid && !(ptw_resp_v && vector_hit && ptw_resp_next.data.hit(tlb.bits.vpn, tlbcsr.satp.asid, tlbcsr.vsatp.asid, tlbcsr.hgatp.vmid, allType = true, ignoreAsid = true))
-//  }
-
-
-//  dtlbIO.ptw.map(a => a.ptw.req)
-//    .zipWithIndex
-//    .foreach{ case (tlb, i) =>
-//      tlb.ready := ptwio.req(i).ready
-//      ptwio.req(i).bits := tlb.bits
-//      val vector_hit = if (refillBothTlb) Cat(ptw_resp_next.vector).orR
-//      else if (i < TlbEndVec(dtlb_ld_idx)) Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_ld_idx), TlbEndVec(dtlb_ld_idx))).orR
-//      else if (i < TlbEndVec(dtlb_st_idx)) Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_st_idx), TlbEndVec(dtlb_st_idx))).orR
-//      else                                 Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_pf_idx), TlbEndVec(dtlb_pf_idx))).orR
-//      ptwio.req(i).valid := tlb.valid && !(ptw_resp_v && vector_hit && ptw_resp_next.data.hit(tlb.bits.vpn, tlbcsr.satp.asid, tlbcsr.vsatp.asid, tlbcsr.hgatp.vmid, allType = true, ignoreAsid = true))
-//    }
-//  dtlb.foreach(_.ptw.resp.bits := ptw_resp_next.data)
-
-
   dtlbIO.ptw.req.map(r => r)
     .zipWithIndex
     .foreach{
       case (tlb, i) =>
-//        val vector_hit = if(i >= DTLB_PORT_START_LD && i < DTLB_PORT_START_ST) {  //ldu
-//          Cat(ptw_resp_next.vector.slice(DTLB_PORT_START_LD, DTLB_PORT_START_LD + LduCnt)).orR
-//        } else if (i >= DTLB_PORT_START_ST && i < DTLB_PORT_START_BOP){           //sta
-//          Cat(ptw_resp_next.vector.slice(DTLB_PORT_START_ST, DTLB_PORT_START_LD + StaCnt)).orR
-//        } else { //bop,sms,stride
-//          Cat(ptw_resp_next.vector.slice(i, i + 1)).orR
-//        }
         val vector_hit = Cat(ptw_resp_next.vector).orR
         tlb.ready := ptwio.req(i).ready
         ptwio.req(i).bits := tlb.bits
         ptwio.req(i).valid := tlb.valid && !(ptw_resp_v && vector_hit && ptw_resp_next.data.hit(tlb.bits.vpn, tlbcsr.satp.asid, tlbcsr.vsatp.asid, tlbcsr.hgatp.vmid, allType = true, ignoreAsid = true))
     }
 
-//  dtlbIO.ptw.resp.bits := ptw_resp_next.data
-//  dtlbIO.foreach(_.ptw.resp.bits := ptw_resp_next.data)
-//  if (refillBothTlb) {
-//    dtlbIO.foreach(_.ptw.resp.valid := ptw_resp_v && Cat(ptw_resp_next.vector).orR)
-//  } else {
-//    dtlb_ld.foreach(_.ptw.resp.valid := ptw_resp_v && Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_ld_idx), TlbEndVec(dtlb_ld_idx))).orR)
-//    dtlb_st.foreach(_.ptw.resp.valid := ptw_resp_v && Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_st_idx), TlbEndVec(dtlb_st_idx))).orR)
-//    dtlb_prefetch.foreach(_.ptw.resp.valid := ptw_resp_v && Cat(ptw_resp_next.vector.slice(TlbStartVec(dtlb_pf_idx), TlbEndVec(dtlb_pf_idx))).orR)
-//  }
-//  dtlb_ld.foreach(_.ptw.resp.bits.getGpa := Cat(ptw_resp_next.getGpa.take(LduCnt + HyuCnt + 1)).orR)
-//  dtlb_st.foreach(_.ptw.resp.bits.getGpa := Cat(ptw_resp_next.getGpa.slice(LduCnt + HyuCnt + 1, LduCnt + HyuCnt + 1 + StaCnt)).orR)
-//  dtlb_prefetch.foreach(_.ptw.resp.bits.getGpa := Cat(ptw_resp_next.getGpa.drop(LduCnt + HyuCnt + 1 + StaCnt)).orR)
-
 
   dtlbIO.ptw.resp.bits := ptw_resp_next.data
   dtlbIO.ptw.resp.valid := ptw_resp_v && Cat(ptw_resp_next.vector).orR
-//  dtlbIO.ptw.resp.bits.getGpa := Cat(ptw_resp_next.getGpa).orR
   dtlbIO.ptw.resp.bits.getGpa := false.B //todo tmp
-
-
-
 
   val dtlbRepeater  = PTWNewFilter(ldtlbParams.fenceDelay, ptwio, ptw.io.tlb(1), sfence, tlbcsr, l2tlbParams.dfilterSize)
   val itlbRepeater3 = PTWRepeaterNB(passReady = false, itlbParams.fenceDelay, io.fetch_to_mem.itlb, ptw.io.tlb(0), sfence, tlbcsr)
@@ -1197,7 +1118,7 @@ class MemBlockInlinedImp(outer: MemBlockInlined) extends LazyModuleImp(outer)
 
   //  lsq.io.rob            <> io.lsqio.rob
   lsq.io.enq            <> io.ooo_to_mem.enqLsq
-  lsq.io.brqRedirect    <> redirect
+  lsq.io.redirect := io.redirect
 
   //  violation rollback
   def selectOldestRedirect(xs: Seq[Valid[Redirect]]): Vec[Bool] = {

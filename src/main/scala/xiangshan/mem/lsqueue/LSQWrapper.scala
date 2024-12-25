@@ -69,7 +69,7 @@ class LsqEnqIO(implicit p: Parameters) extends MemBlockBundle {
 class LsqWrapper(implicit p: Parameters) extends XSModule with HasDCacheParameters with HasPerfEvents {
   val io = IO(new Bundle() {
     val hartId = Input(UInt(hartIdLen.W))
-    val brqRedirect = Flipped(ValidIO(new Redirect))
+    val redirect = Flipped(ValidIO(new Redirect))
     val stvecFeedback = Vec(VecStorePipelineWidth, Flipped(ValidIO(new FeedbackToLsqIO)))
     val ldvecFeedback = Vec(VecLoadPipelineWidth, Flipped(ValidIO(new FeedbackToLsqIO)))
     val enq = new LsqEnqIO
@@ -173,7 +173,7 @@ class LsqWrapper(implicit p: Parameters) extends XSModule with HasDCacheParamete
   }
 
   // store queue wiring
-  storeQueue.io.brqRedirect <> io.brqRedirect
+  storeQueue.io.brqRedirect <> RegNextWithEnable(io.redirect)
   storeQueue.io.vecFeedback   <> io.stvecFeedback
   storeQueue.io.storeAddrIn <> io.sta.storeAddrIn // from store_s1
   storeQueue.io.storeAddrInRe <> io.sta.storeAddrInRe // from store_s2
@@ -199,7 +199,7 @@ class LsqWrapper(implicit p: Parameters) extends XSModule with HasDCacheParamete
   /* <------- DANGEROUS: Don't change sequence here ! -------> */
 
   //  load queue wiring
-  loadQueue.io.redirect            <> io.brqRedirect
+  loadQueue.io.redirect            <> io.redirect
   loadQueue.io.vecFeedback           <> io.ldvecFeedback
   loadQueue.io.ldu                 <> io.ldu
   loadQueue.io.ldout               <> io.ldout

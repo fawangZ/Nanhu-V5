@@ -130,8 +130,9 @@ class VirtualLoadQueue(implicit p: Parameters) extends XSModule
   //  maintain pointers
   val enqPtrExt = RegInit(VecInit((0 until io.enq.req.length).map(_.U.asTypeOf(new LqPtr))))
   val enqPtr = enqPtrExt(0).value
-  val deqPtr = Wire(new LqPtr)
+  val deqPtr = RegInit(0.U.asTypeOf(new LqPtr))
   val deqPtrNext = Wire(new LqPtr)
+  val deqPtr_dup_allocated = RegInit(0.U.asTypeOf(new LqPtr))
 
   /**
    * update pointer
@@ -199,7 +200,10 @@ class VirtualLoadQueue(implicit p: Parameters) extends XSModule
   // cycle 2: update deqPtr
   val deqPtrUpdateEna = lastCommitCount =/= 0.U
   deqPtrNext := deqPtr + lastCommitCount
-  deqPtr := RegEnable(deqPtrNext, 0.U.asTypeOf(new LqPtr), deqPtrUpdateEna)
+  when(deqPtrUpdateEna){
+    deqPtr := deqPtrNext
+    deqPtr_dup_allocated := deqPtrNext
+  }
 
   io.lqDeq := GatedRegNext(lastCommitCount)
   io.lqCancelCnt := redirectCancelCount
@@ -343,8 +347,8 @@ class VirtualLoadQueue(implicit p: Parameters) extends XSModule
     */
   (0 until DeqPtrMoveStride).map(i => {
     when (commitCount > i.U) {
-      allocated((deqPtr+i.U).value) := false.B
-      XSError(!allocated((deqPtr+i.U).value), s"why commit invalid entry $i?\n")
+      allocated((deqPtr_dup_allocated+i.U).value) := false.B
+      XSError(!allocated((deqPtr_dup_allocated+i.U).value), s"why commit invalid entry $i?\n")
     }
   })
 

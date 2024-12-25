@@ -159,7 +159,15 @@ class WithNanhuV5_3Config extends Config((site, here, up) =>{
       VecDqDeqWidth = 6,
       LsDqDeqWidth = 6
     ),
-
+    dtlbParameters = TLBParameters(
+      name = "dtlb",
+      NWays = 48,
+      outReplace = false,
+      partialStaticPMP = true,
+      outsideRecvFlush = true,
+      saveLevel = false,
+      lgMaxSize = 4
+    ),
     l2tlbParameters = L2TLBParameters(
       name = "l2tlb",
       // l3

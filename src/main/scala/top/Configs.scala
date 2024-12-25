@@ -147,6 +147,14 @@ class MinimalConfig(n: Int = 1) extends Config(
           useDmode = false,
           NWays = 4,
         ),
+        dtlbParameters = TLBParameters(
+          name = "ldtlb",
+          NWays = 4,
+          partialStaticPMP = true,
+          outsideRecvFlush = true,
+          outReplace = false,
+          lgMaxSize = 4
+        ),
         ldtlbParameters = TLBParameters(
           name = "ldtlb",
           NWays = 4,
